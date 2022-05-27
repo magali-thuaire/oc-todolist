@@ -20,7 +20,6 @@ security:
                 always_use_default_target_path:  true
                 default_target_path:  /
             logout: ~
-            logout_on_user_change: true
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
