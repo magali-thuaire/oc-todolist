@@ -16,3 +16,4 @@
 /web/bundles/
 
 /tools/rector/vendor
+.phpunit.result.cache

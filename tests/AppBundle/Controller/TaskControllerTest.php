@@ -88,9 +88,9 @@ class TaskControllerTest extends BaseWebTestCase
 
         $this->assertEquals($toggleTaskUri, $toggleTaskForm->attr('action'));
         if ($firstTaskFixture->isDone()) {
-            $this->assertContains('Marquer non terminée', $toggleBtn->text());
+            $this->assertStringContainsString('Marquer non terminée', $toggleBtn->text());
         } else {
-            $this->assertContains('Marquer comme faite', $toggleBtn->text());
+            $this->assertStringContainsString('Marquer comme faite', $toggleBtn->text());
         }
     }
 
@@ -169,7 +169,7 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Success Message
         $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertContains('Superbe ! La tâche a été bien été ajoutée.', $successMessage);
+        $this->assertStringContainsString('Superbe ! La tâche a été bien été ajoutée.', $successMessage);
 
         // Created Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
@@ -198,9 +198,9 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Errors
         $titleError = $crawler->filter('.help-block')->first()->text();
-        $this->assertContains('Vous devez saisir un titre.', $titleError);
+        $this->assertStringContainsString('Vous devez saisir un titre.', $titleError);
         $contentError = $crawler->filter('.help-block')->last()->text();
-        $this->assertContains('Vous devez saisir du contenu.', $contentError);
+        $this->assertStringContainsString('Vous devez saisir du contenu.', $contentError);
     }
 
     public function testTaskGETEditAuthorized()
@@ -263,7 +263,7 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Success Message
         $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertContains('Superbe ! La tâche a bien été modifiée.', $successMessage);
+        $this->assertStringContainsString('Superbe ! La tâche a bien été modifiée.', $successMessage);
 
         // Updated Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
@@ -296,9 +296,9 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Errors
         $titleError = $crawler->filter('.help-block')->first()->text();
-        $this->assertContains('Vous devez saisir un titre.', $titleError);
+        $this->assertStringContainsString('Vous devez saisir un titre.', $titleError);
         $contentError = $crawler->filter('.help-block')->last()->text();
-        $this->assertContains('Vous devez saisir du contenu.', $contentError);
+        $this->assertStringContainsString('Vous devez saisir du contenu.', $contentError);
     }
 
     public function testTaskGETToggleAuthorized()
@@ -322,7 +322,7 @@ class TaskControllerTest extends BaseWebTestCase
 
         if (!$task->isDone()) {
             $successMessage = $crawler->filter('div.alert.alert-success')->text();
-            $this->assertContains(
+            $this->assertStringContainsString(
                 sprintf('Superbe ! La tâche %s a bien été marquée comme faite.', $task->getTitle()),
                 $successMessage
             );
@@ -366,7 +366,7 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Success Message
         $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertContains('Superbe ! La tâche a bien été supprimée.', $successMessage);
+        $this->assertStringContainsString('Superbe ! La tâche a bien été supprimée.', $successMessage);
 
         // Deleted Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
