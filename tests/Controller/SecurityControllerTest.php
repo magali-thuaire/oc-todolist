@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\AppBundle\Controller;
+namespace App\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Tests\AppBundle\Utils\BaseWebTestCase;
+use App\Tests\Utils\BaseWebTestCase;
 
 class SecurityControllerTest extends BaseWebTestCase
 {

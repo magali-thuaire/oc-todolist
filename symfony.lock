@@ -326,9 +326,6 @@
     "symfony/stopwatch": {
         "version": "v4.4.38"
     },
-    "symfony/templating": {
-        "version": "v4.4.37"
-    },
     "symfony/translation-contracts": {
         "version": "v2.5.1"
     },

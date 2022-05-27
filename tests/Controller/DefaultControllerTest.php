@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\AppBundle\Controller;
+namespace App\Tests\Controller;
 
-use Tests\AppBundle\Utils\BaseWebTestCase;
+use App\Tests\Utils\BaseWebTestCase;
 
 class DefaultControllerTest extends BaseWebTestCase
 {

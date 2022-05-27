@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\AppBundle\Controller;
+namespace App\Tests\Controller;
 
-use AppBundle\Entity\Task;
+use App\Entity\Task;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Tests\AppBundle\Utils\BaseWebTestCase;
+use App\Tests\Utils\BaseWebTestCase;
 
 class TaskControllerTest extends BaseWebTestCase
 {
