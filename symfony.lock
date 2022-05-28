@@ -74,6 +74,9 @@
     "psr/container": {
         "version": "1.1.2"
     },
+    "psr/event-dispatcher": {
+        "version": "1.0.0"
+    },
     "psr/log": {
         "version": "1.1.4"
     },
@@ -119,9 +122,6 @@
     },
     "symfony/css-selector": {
         "version": "v4.4.37"
-    },
-    "symfony/debug": {
-        "version": "v4.4.41"
     },
     "symfony/debug-bundle": {
         "version": "4.4",
@@ -201,22 +201,10 @@
             "src/Kernel.php"
         ]
     },
-    "symfony/http-client-contracts": {
-        "version": "v2.5.1"
-    },
     "symfony/http-foundation": {
         "version": "v4.4.42"
     },
     "symfony/http-kernel": {
-        "version": "v4.4.42"
-    },
-    "symfony/inflector": {
-        "version": "v4.4.37"
-    },
-    "symfony/intl": {
-        "version": "v4.4.41"
-    },
-    "symfony/mime": {
         "version": "v4.4.42"
     },
     "symfony/monolog-bridge": {
@@ -240,6 +228,9 @@
     "symfony/options-resolver": {
         "version": "v4.4.37"
     },
+    "symfony/password-hasher": {
+        "version": "v5.4.8"
+    },
     "symfony/phpunit-bridge": {
         "version": "4.4",
         "recipe": {
@@ -258,10 +249,10 @@
     "symfony/polyfill-ctype": {
         "version": "v1.25.0"
     },
-    "symfony/polyfill-intl-icu": {
+    "symfony/polyfill-intl-grapheme": {
         "version": "v1.25.0"
     },
-    "symfony/polyfill-intl-idn": {
+    "symfony/polyfill-intl-icu": {
         "version": "v1.25.0"
     },
     "symfony/polyfill-intl-normalizer": {
@@ -284,6 +275,9 @@
     },
     "symfony/property-access": {
         "version": "v4.4.41"
+    },
+    "symfony/property-info": {
+        "version": "v5.4.9"
     },
     "symfony/routing": {
         "version": "4.4",
@@ -328,6 +322,9 @@
     },
     "symfony/stopwatch": {
         "version": "v4.4.38"
+    },
+    "symfony/string": {
+        "version": "v5.4.9"
     },
     "symfony/translation-contracts": {
         "version": "v2.5.1"
