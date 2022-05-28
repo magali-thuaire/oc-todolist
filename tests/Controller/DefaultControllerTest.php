@@ -14,7 +14,7 @@ class DefaultControllerTest extends BaseWebTestCase
         $this->unauthorizedAction($uri);
     }
 
-    public function getUnauthorizedActions()
+    public function getUnauthorizedActions(): array
     {
         return [
             ['/'],

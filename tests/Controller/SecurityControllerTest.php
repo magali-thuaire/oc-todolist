@@ -92,7 +92,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->assertSame($credentialsError, 'Invalid credentials.');
     }
 
-    public function getUnauthorizedActions()
+    public function getUnauthorizedActions(): array
     {
         return [
             ['/logout'],

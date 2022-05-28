@@ -4,13 +4,14 @@ namespace App\Tests\Utils;
 
 use App\Entity\User;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class BaseWebTestCase extends WebTestCase
 {
-    protected $client;
+    protected KernelBrowser $client;
 
     protected function setUp(): void
     {
@@ -35,12 +36,7 @@ class BaseWebTestCase extends WebTestCase
 
     protected function getPasswordHasher()
     {
-        return $this->client->getContainer()->get('security.password_encoder');
-    }
-
-    protected function getTokenStorage()
-    {
-        return $this->client->getContainer()->get('security.token_storage');
+        return $this->client->getContainer()->get('security.user_password_hasher');
     }
 
     protected function unauthorizedAction($uri)
@@ -59,13 +55,10 @@ class BaseWebTestCase extends WebTestCase
     public function notFound404Exception($uri)
     {
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $this->client->request(Request::METHOD_GET, $uri, [], [], [
-                'PHP_AUTH_USER' => 'user_username',
-                'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $this->client->request(Request::METHOD_GET, $uri);
 
         // Response
         $this->assertEquals(Response::HTTP_NOT_FOUND, $this->client->getResponse()->getStatusCode());
@@ -77,17 +70,23 @@ class BaseWebTestCase extends WebTestCase
         $purger->purge();
     }
 
-    protected function createAuthorizedUser()
+    protected function createAuthorizedUser(): User
     {
         $user = new User();
         $user->setUsername('user_username');
         $user->setEmail('user_username@todolist.fr');
         $plainPassword = 'todolist';
-        $user->setPassword($this->getPasswordHasher()->encodePassword($user, $plainPassword));
+        $user->setPassword($this->getPasswordHasher()->hashPassword($user, $plainPassword));
 
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
-
         return $user;
+    }
+
+    protected function createAuthorizedUserAndLogin(): void
+    {
+        $user = $this->createAuthorizedUser();
+
+        $this->client->loginUser($user);
     }
 }
