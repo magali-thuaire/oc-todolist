@@ -5,6 +5,8 @@
 
 /tools/rector/vendor
 .phpunit.result.cache
+/tools/php-cs-fixer/vendor
+.php-cs-fixer.cache
 
 ###> symfony/phpunit-bridge ###
 .phpunit

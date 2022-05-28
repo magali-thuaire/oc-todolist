@@ -3,11 +3,15 @@
 namespace App\Tests\Utils;
 
 use App\Entity\User;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
 
 class BaseWebTestCase extends WebTestCase
 {
@@ -19,22 +23,22 @@ class BaseWebTestCase extends WebTestCase
         $this->purgeDatabase();
     }
 
-    protected function getRouter()
+    protected function getRouter(): ?Router
     {
         return $this->client->getContainer()->get('router');
     }
 
-    protected function getDoctrine()
+    protected function getDoctrine(): ?Registry
     {
         return $this->client->getContainer()->get('doctrine');
     }
 
-    protected function getEntityManager()
+    protected function getEntityManager(): ?EntityManager
     {
         return $this->client->getContainer()->get('doctrine.orm.entity_manager');
     }
 
-    protected function getPasswordHasher()
+    protected function getPasswordHasher(): ?UserPasswordHasher
     {
         return $this->client->getContainer()->get('security.user_password_hasher');
     }

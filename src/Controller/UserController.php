@@ -6,26 +6,19 @@ use App\Entity\User;
 use App\Form\UserType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 
 class UserController extends AbstractController
 {
-    private ManagerRegistry $managerRegistry;
-    private EntityManagerInterface $em;
-    private UserPasswordHasherInterface $userPasswordHasher;
-
     public function __construct(
-        ManagerRegistry $managerRegistry,
-        EntityManagerInterface $em,
-        UserPasswordHasherInterface $userPasswordHasher
+        private readonly ManagerRegistry $managerRegistry,
+        private readonly EntityManagerInterface $em,
+        private readonly UserPasswordHasherInterface $userPasswordHasher
     ) {
-        $this->managerRegistry = $managerRegistry;
-        $this->em = $em;
-        $this->userPasswordHasher = $userPasswordHasher;
     }
 
     /**
@@ -34,7 +27,7 @@ class UserController extends AbstractController
     public function listAction(): Response
     {
         return $this->render('user/list.html.twig', [
-            'users' => $this->managerRegistry->getRepository(User::class)->findAll()
+            'users' => $this->managerRegistry->getRepository(User::class)->findAll(),
         ]);
     }
 
@@ -61,7 +54,7 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/create.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 

@@ -6,20 +6,17 @@ use App\Entity\Task;
 use App\Form\TaskType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 class TaskController extends AbstractController
 {
-    private ManagerRegistry $managerRegistry;
-    private EntityManagerInterface $em;
-
-    public function __construct(ManagerRegistry $managerRegistry, EntityManagerInterface $em)
-    {
-        $this->managerRegistry = $managerRegistry;
-        $this->em = $em;
+    public function __construct(
+        private readonly ManagerRegistry $managerRegistry,
+        private readonly EntityManagerInterface $em
+    ) {
     }
 
     /**
@@ -28,7 +25,7 @@ class TaskController extends AbstractController
     public function listAction(): Response
     {
         return $this->render('task/list.html.twig', [
-            'tasks' => $this->managerRegistry->getRepository(Task::class)->findAll()
+            'tasks' => $this->managerRegistry->getRepository(Task::class)->findAll(),
         ]);
     }
 
@@ -52,7 +49,7 @@ class TaskController extends AbstractController
         }
 
         return $this->render('task/create.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 
