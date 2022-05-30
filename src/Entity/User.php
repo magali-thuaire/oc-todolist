@@ -22,7 +22,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: "Vous devez saisir un nom d'utilisateur.")]
     private ?string $username = null;
 
-    #[ORM\Column(length: 64)]
+    #[ORM\Column]
     private ?string $password = null;
 
     #[ORM\Column(length: 60, unique: true)]
