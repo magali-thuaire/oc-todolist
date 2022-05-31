@@ -83,7 +83,7 @@ class UserControllerTest extends BaseWebTestCase
 
         // Success Message
         $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertContains('Superbe ! L\'utilisateur a bien été ajouté.', $successMessage);
+        $this->assertStringContainsString('Superbe ! L\'utilisateur a bien été ajouté.', $successMessage);
 
         // Created User
         $userRepository = $this->getDoctrine()->getRepository(User::class);
@@ -109,9 +109,9 @@ class UserControllerTest extends BaseWebTestCase
 
         // Errors
         $usernameError = $crawler->filter('.help-block')->first()->text();
-        $this->assertContains('Vous devez saisir un nom d\'utilisateur.', $usernameError);
+        $this->assertStringContainsString('Vous devez saisir un nom d\'utilisateur.', $usernameError);
         $emailError = $crawler->filter('.help-block')->last()->text();
-        $this->assertContains('Vous devez saisir une adresse email.', $emailError);
+        $this->assertStringContainsString('Vous devez saisir une adresse email.', $emailError);
     }
 
     public function testUserGETEdit()
@@ -181,7 +181,7 @@ class UserControllerTest extends BaseWebTestCase
 
         // Success Message
         $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertContains('Superbe ! L\'utilisateur a bien été modifié', $successMessage);
+        $this->assertStringContainsString('Superbe ! L\'utilisateur a bien été modifié', $successMessage);
 
         // Updated User
         $userRepository = $this->getDoctrine()->getRepository(User::class);
@@ -210,9 +210,9 @@ class UserControllerTest extends BaseWebTestCase
 
         // Errors
         $usernameError = $crawler->filter('.help-block')->first()->text();
-        $this->assertContains('Vous devez saisir un nom d\'utilisateur.', $usernameError);
+        $this->assertStringContainsString('Vous devez saisir un nom d\'utilisateur.', $usernameError);
         $emailError = $crawler->filter('.help-block')->last()->text();
-        $this->assertContains('Vous devez saisir une adresse email.', $emailError);
+        $this->assertStringContainsString('Vous devez saisir une adresse email.', $emailError);
     }
 
     /**
