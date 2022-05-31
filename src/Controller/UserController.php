@@ -21,9 +21,7 @@ class UserController extends AbstractController
     ) {
     }
 
-    /**
-     * @Route("/users", name="user_list")
-     */
+    #[Route(path: '/users', name: 'user_list')]
     public function listAction(): Response
     {
         return $this->render('user/list.html.twig', [
@@ -31,16 +29,12 @@ class UserController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/users/create", name="user_create")
-     */
+    #[Route(path: '/users/create', name: 'user_create')]
     public function createAction(Request $request): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
-
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $password = $this->userPasswordHasher->hashPassword($user, $user->getPassword());
             $user->setPassword($password);
@@ -58,15 +52,11 @@ class UserController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/users/{id}/edit", name="user_edit")
-     */
+    #[Route(path: '/users/{id}/edit', name: 'user_edit')]
     public function editAction(User $user, Request $request): Response
     {
         $form = $this->createForm(UserType::class, $user);
-
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $password = $this->userPasswordHasher->hashPassword($user, $user->getPassword());
             $user->setPassword($password);

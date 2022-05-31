@@ -19,9 +19,7 @@ class TaskController extends AbstractController
     ) {
     }
 
-    /**
-     * @Route("/tasks", name="task_list")
-     */
+    #[Route(path: '/tasks', name: 'task_list')]
     public function listAction(): Response
     {
         return $this->render('task/list.html.twig', [
@@ -29,16 +27,12 @@ class TaskController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/tasks/create", name="task_create")
-     */
+    #[Route(path: '/tasks/create', name: 'task_create')]
     public function createAction(Request $request): Response
     {
         $task = new Task();
         $form = $this->createForm(TaskType::class, $task);
-
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($task);
             $this->em->flush();
@@ -53,15 +47,11 @@ class TaskController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/tasks/{id}/edit", name="task_edit")
-     */
+    #[Route(path: '/tasks/{id}/edit', name: 'task_edit')]
     public function editAction(Task $task, Request $request): Response
     {
         $form = $this->createForm(TaskType::class, $task);
-
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->flush();
 
@@ -76,27 +66,21 @@ class TaskController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/tasks/{id}/toggle", name="task_toggle")
-     */
+    #[Route(path: '/tasks/{id}/toggle', name: 'task_toggle')]
     public function toggleTaskAction(Task $task): Response
     {
         $task->toggle(!$task->isDone());
         $this->em->flush();
-
         $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
 
         return $this->redirectToRoute('task_list');
     }
 
-    /**
-     * @Route("/tasks/{id}/delete", name="task_delete")
-     */
+    #[Route(path: '/tasks/{id}/delete', name: 'task_delete')]
     public function deleteTaskAction(Task $task): Response
     {
         $this->em->remove($task);
         $this->em->flush();
-
         $this->addFlash('success', 'La tâche a bien été supprimée.');
 
         return $this->redirectToRoute('task_list');
