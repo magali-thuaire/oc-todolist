@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Task;
+use App\Factory\TaskFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Tests\Utils\BaseWebTestCase;
@@ -20,7 +21,7 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETListAuthorized()
     {
         // Tasks
-        $tasksFixture = $this->createTask(5);
+        $tasksFixture = TaskFactory::createMany(5);
         $firstTaskFixture = current($tasksFixture);
 
         // Logged User
@@ -30,7 +31,7 @@ class TaskControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks');
 
         // Response
-        $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
 //        // New User button
 //        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
@@ -57,8 +58,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('Créer une tâche', $newUserButton->text());
 
         // Tasks
-        $nbTasks = $crawler->filter('div.thumbnail')->count();
-        $this->assertEquals(5, $nbTasks);
+        $this->assertCount(5, $crawler->filter('div.thumbnail'));
 
         // First Task
         $firstTask = $crawler->filter('div.thumbnail')->first();
@@ -85,9 +85,9 @@ class TaskControllerTest extends BaseWebTestCase
 
         $this->assertEquals($toggleTaskUri, $toggleTaskForm->attr('action'));
         if ($firstTaskFixture->isDone()) {
-            $this->assertStringContainsString('Marquer non terminée', $toggleBtn->text());
+            $this->assertEquals('Marquer non terminée', $toggleBtn->text());
         } else {
-            $this->assertStringContainsString('Marquer comme faite', $toggleBtn->text());
+            $this->assertEquals('Marquer comme faite', $toggleBtn->text());
         }
     }
 
@@ -100,7 +100,7 @@ class TaskControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
 
         // Response
-        $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
 //        // New User button
 //        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
@@ -127,12 +127,11 @@ class TaskControllerTest extends BaseWebTestCase
 
         $this->assertNotEmpty($form = $crawler->filter('form'));
         $this->assertEquals($newTaskUri, $form->attr('action'));
-        $this->assertNotEmpty($form->filter('input[type=text]#task_title'));
-        $this->assertNotEmpty($form->filter('textarea#task_content'));
+        $this->assertSelectorExists('input[type=text]#task_title');
+        $this->assertSelectorExists('textarea#task_content');
 
         // Submit button
-        $this->assertNotEmpty($submitBtn = $form->filter('button.btn.btn-success[type=submit]'));
-        $this->assertEquals('Ajouter', $submitBtn->text());
+        $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Ajouter');
 
         // Return button
         $this->assertNotEmpty($returnBtn = $crawler->filter('a.btn.btn-primary')->last());
@@ -155,17 +154,19 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $crawler = $this->client->followRedirect();
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
 
         // Success Message
-        $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertStringContainsString('Superbe ! La tâche a été bien été ajoutée.', $successMessage);
+        $this->assertSelectorTextSame(
+            'div.alert.alert-success',
+            'Superbe ! La tâche a été bien été ajoutée.'
+        );
 
         // Created Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
         $createdTask = $taskRepository->findOneBy(['title' => 'task_title']);
-        $this->assertNotEmpty($createdTask, 'task created not found');
+        $this->assertNotNull($createdTask, 'task created not found');
         $this->assertEquals('task_content', $createdTask->getContent());
     }
 
@@ -184,17 +185,20 @@ class TaskControllerTest extends BaseWebTestCase
         ]);
         $crawler = $this->client->submit($form);
 
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+
         // Errors
         $titleError = $crawler->filter('.help-block')->first()->text();
-        $this->assertStringContainsString('Vous devez saisir un titre.', $titleError);
+        $this->assertEquals('Vous devez saisir un titre.', $titleError);
         $contentError = $crawler->filter('.help-block')->last()->text();
-        $this->assertStringContainsString('Vous devez saisir du contenu.', $contentError);
+        $this->assertEquals('Vous devez saisir du contenu.', $contentError);
     }
 
     public function testTaskGETEditAuthorized()
     {
         // Initial Task
-        $task = current($this->createTask());
+        $task = $this->createTask();
 
         // Logged User
         $this->createAuthorizedUserAndLogin();
@@ -203,7 +207,7 @@ class TaskControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
 
         // Response
-        $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         // Form
         $updateTaskUri = $this->getRouter()->generate('task_edit', ['id' => $task->getId()]);
@@ -211,20 +215,19 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($form = $crawler->filter('form'));
         $this->assertEquals($updateTaskUri, $form->attr('action'));
 
-        $this->assertNotEmpty($title = $form->filter('input[type=text]#task_title'));
-        $this->assertSame('task_title_1', $title->attr('value'));
+        $this->assertInputValueSame('task[title]', 'task_title');
 
         $this->assertNotEmpty($content = $form->filter('textarea#task_content'));
-        $this->assertSame('task_content_1', $content->text());
+        $this->assertSame('task_content', $content->text());
 
-        $this->assertNotEmpty($submitBtn = $form->filter('button.btn.btn-success[type=submit]'));
-        $this->assertEquals('Modifier', $submitBtn->text());
+        // Submit button
+        $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Modifier');
     }
 
     public function testTaskPOSTEditAuthorized()
     {
         // Initial Task
-        $task = current($this->createTask());
+        $task = $this->createTask();
 
         // Logged User
         $this->createAuthorizedUserAndLogin();
@@ -240,12 +243,14 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $crawler = $this->client->followRedirect();
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
 
         // Success Message
-        $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertStringContainsString('Superbe ! La tâche a bien été modifiée.', $successMessage);
+        $this->assertSelectorTextSame(
+            'div.alert.alert-success',
+            'Superbe ! La tâche a bien été modifiée.'
+        );
 
         // Updated Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
@@ -273,17 +278,20 @@ class TaskControllerTest extends BaseWebTestCase
         ]);
         $crawler = $this->client->submit($form);
 
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+
         // Errors
         $titleError = $crawler->filter('.help-block')->first()->text();
-        $this->assertStringContainsString('Vous devez saisir un titre.', $titleError);
+        $this->assertEquals('Vous devez saisir un titre.', $titleError);
         $contentError = $crawler->filter('.help-block')->last()->text();
-        $this->assertStringContainsString('Vous devez saisir du contenu.', $contentError);
+        $this->assertEquals('Vous devez saisir du contenu.', $contentError);
     }
 
     public function testTaskGETToggleAuthorized()
     {
         // Initial Task
-        $task = current($this->createTask());
+        $task = $this->createTask();
         $isDone = $task->isDone();
 
         // Logged User
@@ -293,18 +301,20 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $task->getId()));
 
         // Redirection
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $crawler = $this->client->followRedirect();
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
 
         if (!$task->isDone()) {
-            $successMessage = $crawler->filter('div.alert.alert-success')->text();
-            $this->assertStringContainsString(
-                sprintf('Superbe ! La tâche %s a bien été marquée comme faite.', $task->getTitle()),
-                $successMessage
+            $this->assertSelectorTextSame(
+                'div.alert.alert-success',
+                sprintf('Superbe ! La tâche %s a bien été marquée comme faite.', $task->getTitle())
             );
         }
 //        else  {
-//            $this->assertSelectorTextContains('div.alert.alert-success', sprintf('Superbe ! La tâche %s a bien été marquée comme non terminée.', $task->getTitle()));
+//            $this->assertSelectorTextSame(
+//                'div.alert.alert-success',
+//                sprintf('Superbe ! La tâche %s a bien été marquée comme non terminée.', $task->getTitle())
+//            );
 //        }
 
         // Toggled Task
@@ -324,7 +334,7 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETDeleteAuthorized()
     {
         // Initial Task
-        $task = current($this->createTask());
+        $task = $this->createTask();
         $taskId = $task->getId();
 
         // Logged User
@@ -334,12 +344,14 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/delete', $task->getId()));
 
         // Redirection
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $crawler = $this->client->followRedirect();
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
 
         // Success Message
-        $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertStringContainsString('Superbe ! La tâche a bien été supprimée.', $successMessage);
+        $this->assertSelectorTextSame(
+            'div.alert.alert-success',
+            'Superbe ! La tâche a bien été supprimée.'
+        );
 
         // Deleted Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
@@ -367,21 +379,14 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function createTask($number = 1): array
+    private function createTask(): Task
     {
-        $tasks = [];
-        for ($i = 1; $i <= $number; $i++) {
-            $task = new Task();
-            $task->setTitle('task_title_' . $i);
-            $task->setContent('task_content_' . $i);
-            $task->toggle(random_int(0, 1));
-
-            $this->getEntityManager()->persist($task);
-            $this->getEntityManager()->flush();
-
-            $tasks[] = $task;
-        }
-
-        return $tasks;
+        return TaskFactory::new()
+                    ->withAttributes([
+                       'title' => 'task_title',
+                       'content' => 'task_content',
+                    ])
+                    ->create()
+                    ->object();
     }
 }
