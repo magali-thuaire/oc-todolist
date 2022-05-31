@@ -3,6 +3,7 @@
 namespace App\Tests\Utils;
 
 use App\Entity\User;
+use App\Factory\UserFactory;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManager;
@@ -48,12 +49,12 @@ class BaseWebTestCase extends WebTestCase
         // Request
         $this->client->request(Request::METHOD_GET, $uri);
 
-//        $loginUrl = $this->getRouter()->generate('login', [], 0);
+        $loginUrl = $this->getRouter()->generate('login', [], 0);
 
         // Response
-//        $this->assertTrue($response->isRedirect($loginUrl));
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $this->assertEquals(Response::HTTP_FOUND, $this->client->getResponse()->getStatusCode());
+        $this->assertTrue($this->client->getResponse()->isRedirect($loginUrl));
+        $this->assertResponseRedirects($loginUrl);
+        $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
     }
 
     public function notFound404Exception($uri)
@@ -65,7 +66,7 @@ class BaseWebTestCase extends WebTestCase
         $this->client->request(Request::METHOD_GET, $uri);
 
         // Response
-        $this->assertEquals(Response::HTTP_NOT_FOUND, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 
     private function purgeDatabase()
@@ -76,15 +77,14 @@ class BaseWebTestCase extends WebTestCase
 
     protected function createAuthorizedUser(): User
     {
-        $user = new User();
-        $user->setUsername('user_username');
-        $user->setEmail('user_username@todolist.fr');
-        $plainPassword = 'todolist';
-        $user->setPassword($this->getPasswordHasher()->hashPassword($user, $plainPassword));
-
-        $this->getEntityManager()->persist($user);
-        $this->getEntityManager()->flush();
-        return $user;
+        return UserFactory::new()
+            ->withAttributes([
+                'username' => 'user_username',
+                'email' => 'user_username@todolist.fr',
+                'password' => 'todolist'
+            ])
+            ->create()
+            ->object();
     }
 
     protected function createAuthorizedUserAndLogin(): void

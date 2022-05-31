@@ -7,6 +7,7 @@ use App\Form\UserType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -30,7 +31,7 @@ class UserController extends AbstractController
     }
 
     #[Route(path: '/users/create', name: 'user_create')]
-    public function createAction(Request $request): Response
+    public function createAction(Request $request): RedirectResponse|Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
@@ -47,13 +48,13 @@ class UserController extends AbstractController
             return $this->redirectToRoute('user_list');
         }
 
-        return $this->render('user/create.html.twig', [
-            'form' => $form->createView(),
+        return $this->renderForm('user/create.html.twig', [
+            'form' => $form,
         ]);
     }
 
     #[Route(path: '/users/{id}/edit', name: 'user_edit')]
-    public function editAction(User $user, Request $request): Response
+    public function editAction(User $user, Request $request): RedirectResponse|Response
     {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
@@ -68,6 +69,9 @@ class UserController extends AbstractController
             return $this->redirectToRoute('user_list');
         }
 
-        return $this->render('user/edit.html.twig', ['form' => $form->createView(), 'user' => $user]);
+        return $this->renderForm('user/edit.html.twig', [
+            'form' => $form,
+            'user' => $user
+        ]);
     }
 }

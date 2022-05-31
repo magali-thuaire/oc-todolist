@@ -22,10 +22,11 @@ class SecurityControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/login');
 
         // Response
-        $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         // New User button
-        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
+        $this->assertSelectorExists('a.btn.btn-primary');
+        $newUserButton = $crawler->filter('a.btn.btn-primary');
 
         $newUserUri = $this->getRouter()->generate('user_create');
 
@@ -36,14 +37,14 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($crawler->filter('img.slide-image'));
 
         // Form
-        $this->assertNotEmpty($form = $crawler->filter('form'));
+        $this->assertSelectorExists('form');
+        $form = $crawler->filter('form');
         $checkLoginUri = $this->getRouter()->generate('login_check');
 
         $this->assertEquals($checkLoginUri, $form->attr('action'));
-        $this->assertNotEmpty($form->filter('input[type=text]#username'));
-        $this->assertNotEmpty($form->filter('input[type=password]#password'));
-        $this->assertNotEmpty($submitBtn = $form->filter('button.btn.btn-success[type=submit]'));
-        $this->assertEquals('Se connecter', $submitBtn->text());
+        $this->assertSelectorExists('input[type=text]#username');
+        $this->assertSelectorExists('input[type=password]#password');
+        $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Se connecter');
     }
 
     public function testSecurityPOSTLogin()
@@ -62,7 +63,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertTrue($this->client->getResponse()->isRedirect());
+        $this->assertResponseRedirects();
         $crawler = $this->client->followRedirect();
 
         $homepageUri = $this->getRouter()->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
@@ -84,12 +85,11 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $crawler = $this->client->followRedirect();
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
 
         // Errors
-        $credentialsError = $crawler->filter('div.alert.alert-danger')->text();
-        $this->assertSame($credentialsError, 'Invalid credentials.');
+        $this->assertSelectorTextSame('div.alert.alert-danger', 'Invalid credentials.');
     }
 
     public function getUnauthorizedActions(): array

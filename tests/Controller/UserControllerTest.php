@@ -15,7 +15,7 @@ class UserControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/users');
 
         // Response
-        $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         // New User button
         $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
@@ -26,8 +26,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals('Créer un utilisateur', $newUserButton->text());
 
         // Main Title
-        $this->assertNotEmpty($h1 = $crawler->filter('h1'));
-        $this->assertEquals('Liste des utilisateurs', $h1->text());
+        $this->assertSelectorTextSame('h1', 'Liste des utilisateurs');
     }
 
     public function testUserGETCreate()
@@ -36,7 +35,7 @@ class UserControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/users/create');
 
         // Response
-        $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         // New User button
         $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
@@ -47,20 +46,18 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals('Créer un utilisateur', $newUserButton->text());
 
         // Main Title
-        $this->assertNotEmpty($h1 = $crawler->filter('h1'));
-        $this->assertEquals('Créer un utilisateur', $h1->text());
+        $this->assertSelectorTextSame('h1', 'Créer un utilisateur');
 
         // Form
         $this->assertNotEmpty($form = $crawler->filter('form'));
         $this->assertEquals($newUserUri, $form->attr('action'));
-        $this->assertNotEmpty($form->filter('input[type=text]#user_username'));
-        $this->assertNotEmpty($form->filter('input[type=password]#user_password_first'));
-        $this->assertNotEmpty($form->filter('input[type=password]#user_password_second'));
-        $this->assertNotEmpty($form->filter('input[type=email]#user_email'));
+        $this->assertSelectorExists('input[type=text]#user_username');
+        $this->assertSelectorExists('input[type=password]#user_password_first');
+        $this->assertSelectorExists('input[type=password]#user_password_second');
+        $this->assertSelectorExists('input[type=email]#user_email');
 
         // Submit button
-        $this->assertNotEmpty($submitBtn = $form->filter('button.btn.btn-success[type=submit]'));
-        $this->assertEquals('Ajouter', $submitBtn->text());
+        $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Ajouter');
     }
 
     public function testUserPOSTCreate()
@@ -78,12 +75,14 @@ class UserControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $crawler = $this->client->followRedirect();
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
 
         // Success Message
-        $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertStringContainsString('Superbe ! L\'utilisateur a bien été ajouté.', $successMessage);
+        $this->assertSelectorTextSame(
+            'div.alert.alert-success',
+            'Superbe ! L\'utilisateur a bien été ajouté.'
+        );
 
         // Created User
         $userRepository = $this->getDoctrine()->getRepository(User::class);
@@ -107,11 +106,14 @@ class UserControllerTest extends BaseWebTestCase
         ]);
         $crawler = $this->client->submit($form);
 
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+
         // Errors
         $usernameError = $crawler->filter('.help-block')->first()->text();
-        $this->assertStringContainsString('Vous devez saisir un nom d\'utilisateur.', $usernameError);
+        $this->assertEquals('Vous devez saisir un nom d\'utilisateur.', $usernameError);
         $emailError = $crawler->filter('.help-block')->last()->text();
-        $this->assertStringContainsString('Vous devez saisir une adresse email.', $emailError);
+        $this->assertEquals('Vous devez saisir une adresse email.', $emailError);
     }
 
     public function testUserGETEdit()
@@ -123,7 +125,7 @@ class UserControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/users/%d/edit', $user->getId()));
 
         // Response
-        $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
 //        // New User button
 //        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
@@ -134,8 +136,7 @@ class UserControllerTest extends BaseWebTestCase
 //        $this->assertEquals('Créer un utilisateur', $newUserButton->text());
 
         // Main Title
-        $this->assertNotEmpty($h1 = $crawler->filter('h1'));
-        $this->assertEquals(sprintf('Modifier %s', $user->getUsername()), $h1->text());
+        $this->assertSelectorTextSame('h1', sprintf('Modifier %s', $user->getUsername()));
 
         // Form
         $updateUserUri = $this->getRouter()->generate('user_edit', ['id' => $user->getId()]);
@@ -143,19 +144,12 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($form = $crawler->filter('form'));
         $this->assertEquals($updateUserUri, $form->attr('action'));
 
-        $this->assertNotEmpty($username = $form->filter('input[type=text]#user_username'));
-        $this->assertSame('user_username', $username->attr('value'));
+        $this->assertSelectorExists('input[type=text]#user_username');
+        $this->assertSelectorExists('input[type=password]#user_password_first');
+        $this->assertSelectorExists('input[type=password]#user_password_second');
 
-        $this->assertNotEmpty($password_first = $form->filter('input[type=password]#user_password_first'));
-        $this->assertNotEmpty($password_second = $form->filter('input[type=password]#user_password_second'));
-        $this->assertEmpty($password_first->attr('value'));
-        $this->assertEmpty($password_second->attr('value'));
-
-        $this->assertNotEmpty($email = $form->filter('input[type=email]#user_email'));
-        $this->assertSame('user_username@todolist.fr', $email->attr('value'));
-
-        $this->assertNotEmpty($submitBtn = $form->filter('button.btn.btn-success[type=submit]'));
-        $this->assertEquals('Modifier', $submitBtn->text());
+        // Submit button
+        $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Modifier');
     }
 
     public function testUserPOSTEdit()
@@ -176,12 +170,14 @@ class UserControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $crawler = $this->client->followRedirect();
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
 
         // Success Message
-        $successMessage = $crawler->filter('div.alert.alert-success')->text();
-        $this->assertStringContainsString('Superbe ! L\'utilisateur a bien été modifié', $successMessage);
+        $this->assertSelectorTextSame(
+            'div.alert.alert-success',
+            'Superbe ! L\'utilisateur a bien été modifié'
+        );
 
         // Updated User
         $userRepository = $this->getDoctrine()->getRepository(User::class);
@@ -208,11 +204,14 @@ class UserControllerTest extends BaseWebTestCase
         ]);
         $crawler = $this->client->submit($form);
 
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+
         // Errors
         $usernameError = $crawler->filter('.help-block')->first()->text();
-        $this->assertStringContainsString('Vous devez saisir un nom d\'utilisateur.', $usernameError);
+        $this->assertEquals('Vous devez saisir un nom d\'utilisateur.', $usernameError);
         $emailError = $crawler->filter('.help-block')->last()->text();
-        $this->assertStringContainsString('Vous devez saisir une adresse email.', $emailError);
+        $this->assertEquals('Vous devez saisir une adresse email.', $emailError);
     }
 
     /**
