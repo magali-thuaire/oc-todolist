@@ -2,17 +2,22 @@
 
 namespace Tests\AppBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Tests\AppBundle\Utils\BaseWebTestCase;
 
-class DefaultControllerTest extends WebTestCase
+class DefaultControllerTest extends BaseWebTestCase
 {
-    public function testIndex()
+    /**
+     * @dataProvider getUnauthorizedActions
+     */
+    public function testUnauthorizedAction($uri)
     {
-        $client = static::createClient();
+        $this->unauthorizedAction($uri);
+    }
 
-        $crawler = $client->request('GET', '/');
-
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertContains('Welcome to Symfony', $crawler->filter('#container h1')->text());
+    public function getUnauthorizedActions()
+    {
+        return [
+            ['/'],
+        ];
     }
 }

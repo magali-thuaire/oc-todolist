@@ -14,3 +14,18 @@ web_profiler:
 
 swiftmailer:
     disable_delivery: true
+
+doctrine:
+    dbal:
+        driver:   pdo_mysql
+        host:     "%database_host%"
+        port:     "%database_port%"
+        dbname:   "%database_name%_test"
+        user:     "%database_user%"
+        password: "%database_password%"
+        charset:  UTF8
+security:
+    firewalls:
+        # replace 'main' by the name of your own firewall
+        main:
+            http_basic: ~
