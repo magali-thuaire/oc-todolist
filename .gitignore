@@ -5,11 +5,11 @@
 
 /tools/rector/vendor
 .phpunit.result.cache
+/tools/php-cs-fixer/vendor
+.php-cs-fixer.cache
 
 ###> symfony/phpunit-bridge ###
 .phpunit
-.phpunit.result.cache
-/phpunit.xml
 ###< symfony/phpunit-bridge ###
 
 ###> symfony/framework-bundle ###
@@ -17,7 +17,5 @@
 /.env.local.php
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
-/public/bundles/
 /var/
-/vendor/
 ###< symfony/framework-bundle ###

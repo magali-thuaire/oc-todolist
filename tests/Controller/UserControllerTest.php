@@ -223,7 +223,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->notFound404Exception($uri);
     }
 
-    public function getNotFoundActions()
+    public function getNotFoundActions(): array
     {
         return [
             ['/users/fake/edit'],

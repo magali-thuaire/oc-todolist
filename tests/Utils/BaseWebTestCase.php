@@ -3,14 +3,19 @@
 namespace App\Tests\Utils;
 
 use App\Entity\User;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\ORM\EntityManager;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
 
 class BaseWebTestCase extends WebTestCase
 {
-    protected $client;
+    protected KernelBrowser $client;
 
     protected function setUp(): void
     {
@@ -18,29 +23,24 @@ class BaseWebTestCase extends WebTestCase
         $this->purgeDatabase();
     }
 
-    protected function getRouter()
+    protected function getRouter(): ?Router
     {
         return $this->client->getContainer()->get('router');
     }
 
-    protected function getDoctrine()
+    protected function getDoctrine(): ?Registry
     {
         return $this->client->getContainer()->get('doctrine');
     }
 
-    protected function getEntityManager()
+    protected function getEntityManager(): ?EntityManager
     {
         return $this->client->getContainer()->get('doctrine.orm.entity_manager');
     }
 
-    protected function getPasswordHasher()
+    protected function getPasswordHasher(): ?UserPasswordHasher
     {
-        return $this->client->getContainer()->get('security.password_encoder');
-    }
-
-    protected function getTokenStorage()
-    {
-        return $this->client->getContainer()->get('security.token_storage');
+        return $this->client->getContainer()->get('security.user_password_hasher');
     }
 
     protected function unauthorizedAction($uri)
@@ -59,13 +59,10 @@ class BaseWebTestCase extends WebTestCase
     public function notFound404Exception($uri)
     {
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $this->client->request(Request::METHOD_GET, $uri, [], [], [
-                'PHP_AUTH_USER' => 'user_username',
-                'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $this->client->request(Request::METHOD_GET, $uri);
 
         // Response
         $this->assertEquals(Response::HTTP_NOT_FOUND, $this->client->getResponse()->getStatusCode());
@@ -77,17 +74,23 @@ class BaseWebTestCase extends WebTestCase
         $purger->purge();
     }
 
-    protected function createAuthorizedUser()
+    protected function createAuthorizedUser(): User
     {
         $user = new User();
         $user->setUsername('user_username');
         $user->setEmail('user_username@todolist.fr');
         $plainPassword = 'todolist';
-        $user->setPassword($this->getPasswordHasher()->encodePassword($user, $plainPassword));
+        $user->setPassword($this->getPasswordHasher()->hashPassword($user, $plainPassword));
 
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
-
         return $user;
+    }
+
+    protected function createAuthorizedUserAndLogin(): void
+    {
+        $user = $this->createAuthorizedUser();
+
+        $this->client->loginUser($user);
     }
 }

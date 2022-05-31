@@ -24,13 +24,10 @@ class TaskControllerTest extends BaseWebTestCase
         $firstTaskFixture = current($tasksFixture);
 
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_GET, '/tasks', [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $crawler = $this->client->request(Request::METHOD_GET, '/tasks');
 
         // Response
         $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
@@ -97,13 +94,10 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETCreateAuthorized()
     {
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create', [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
 
         // Response
         $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
@@ -148,13 +142,10 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskPOSTCreateAuthorized()
     {
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create', [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
 
         // Form
         $form = $crawler->selectButton('Ajouter')->form([
@@ -181,13 +172,10 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskPOSTCreateAuthorizedWithErrors()
     {
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create', [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
 
         // Form
         $form = $crawler->selectButton('Ajouter')->form([
@@ -209,13 +197,10 @@ class TaskControllerTest extends BaseWebTestCase
         $task = current($this->createTask());
 
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()), [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
 
         // Response
         $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
@@ -242,13 +227,10 @@ class TaskControllerTest extends BaseWebTestCase
         $task = current($this->createTask());
 
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()), [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
 
         // Form
         $form = $crawler->selectButton('Modifier')->form([
@@ -279,13 +261,10 @@ class TaskControllerTest extends BaseWebTestCase
         $this->createTask();
 
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create', [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
 
         // Form
         $form = $crawler->selectButton('Ajouter')->form([
@@ -308,13 +287,10 @@ class TaskControllerTest extends BaseWebTestCase
         $isDone = $task->isDone();
 
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $task->getId()), [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $task->getId()));
 
         // Redirection
         $this->assertTrue($this->client->getResponse()->isRedirect());
@@ -352,13 +328,10 @@ class TaskControllerTest extends BaseWebTestCase
         $taskId = $task->getId();
 
         // Logged User
-        $this->createAuthorizedUser();
+        $this->createAuthorizedUserAndLogin();
 
         // Request
-        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/delete', $task->getId()), [], [], [
-            'PHP_AUTH_USER' => 'user_username',
-            'PHP_AUTH_PW'   => 'todolist',
-        ]);
+        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/delete', $task->getId()));
 
         // Redirection
         $this->assertTrue($this->client->getResponse()->isRedirect());
@@ -374,7 +347,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertNull($deletedTask);
     }
 
-    public function getUnauthorizedActions()
+    public function getUnauthorizedActions(): array
     {
         return [
             ['/tasks'],
@@ -385,7 +358,7 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    public function getNotFoundActions()
+    public function getNotFoundActions(): array
     {
         return [
             ['/tasks/fake/edit'],
@@ -394,7 +367,7 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function createTask($number = 1)
+    private function createTask($number = 1): array
     {
         $tasks = [];
         for ($i = 1; $i <= $number; $i++) {
