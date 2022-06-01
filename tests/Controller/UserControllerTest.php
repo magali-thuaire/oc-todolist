@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\User;
+use App\Factory\UserFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Tests\Utils\BaseWebTestCase;
@@ -66,13 +67,12 @@ class UserControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/users/create');
 
         // Form
-        $form = $crawler->selectButton('Ajouter')->form([
+        $this->submitCreateForm($crawler, [
             'user[username]' => 'test',
             'user[plainPassword][first]' => 'todolist',
             'user[plainPassword][second]' => 'todolist',
             'user[email]' => 'test@totdolist.fr'
         ]);
-        $this->client->submit($form);
 
         // Redirection
         $this->assertResponseRedirects();
@@ -92,34 +92,64 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertTrue($userPasswodHasher->isPasswordValid($createdUser, 'todolist'));
     }
 
-    public function testUserPOSTCreateWithErrors()
-    {
+    /**
+     * @dataProvider getValidationErrors()
+     */
+    public function testUserPOSTCreateWithErrors(
+        string $fieldName,
+        ?string $fieldValue,
+        string $selector,
+        string $idValidationMessage
+    ) {
+
+        // New user
+        $this->createUser();
+
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/users/create');
 
         // Form
-        $form = $crawler->selectButton('Ajouter')->form([
-            'user[username]' => null,
-            'user[plainPassword][first]' => 'todolist',
-            'user[plainPassword][second]' => 'todolist',
-            'user[email]' => null
+        $crawler = $this->submitCreateForm($crawler, [
+            $fieldName => $fieldValue,
         ]);
-        $crawler = $this->client->submit($form);
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         // Errors
-        $usernameError = $crawler->filter('.help-block')->first()->text();
-        $this->assertEquals('Vous devez saisir un nom d\'utilisateur.', $usernameError);
-        $emailError = $crawler->filter('.help-block')->last()->text();
-        $this->assertEquals('Vous devez saisir une adresse email.', $emailError);
+        $fieldError = $crawler->filter($selector)->siblings()->filter('.help-block')->text();
+        $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
+    }
+
+    /**
+     * @dataProvider getPasswordValidationErrors()
+     */
+    public function testUserPOSTCreateWithErrorsPassword(
+        ?string $firstPasswordValue,
+        ?string $secondPasswordValue,
+        string $idValidationMessage
+    ) {
+        // Request
+        $crawler = $this->client->request(Request::METHOD_GET, '/users/create');
+
+        // Form
+        $crawler = $this->submitCreateForm($crawler, [
+            'user[plainPassword][first]' => $firstPasswordValue,
+            'user[plainPassword][second]' => $secondPasswordValue,
+        ]);
+
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        // Errors
+        $passwordError = $crawler->filter('#user_plainPassword_first')->siblings()->filter('.help-block')->text();
+        $this->assertEquals($this->getValidationMessage($idValidationMessage), $passwordError);
     }
 
     public function testUserGETEdit()
     {
         // User
-        $user = $this->createAuthorizedUser();
+        $user = $this->createUser();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/users/%d/edit', $user->getId()));
@@ -155,19 +185,18 @@ class UserControllerTest extends BaseWebTestCase
     public function testUserPOSTEdit()
     {
         // Initial User
-        $user = $this->createAuthorizedUser();
+        $user = $this->createUser();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/users/%d/edit', $user->getId()));
 
         // Form
-        $form = $crawler->selectButton('Modifier')->form([
+        $this->submitEditForm($crawler, [
             'user[username]' => 'user_username_updated',
             'user[plainPassword][first]' => 'user_password_updated',
             'user[plainPassword][second]' => 'user_password_updated',
             'user[email]' => 'user_email_updated@todolist.fr'
         ]);
-        $this->client->submit($form);
 
         // Redirection
         $this->assertResponseRedirects();
@@ -187,31 +216,61 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertTrue($userPasswodHasher->isPasswordValid($updatedUser, 'user_password_updated'));
     }
 
-    public function testUserPOSTEditWithErrors()
-    {
+    /**
+     * @dataProvider getValidationErrors()
+     */
+    public function testUserPOSTEditWithErrors(
+        string $fieldName,
+        ?string $fieldValue,
+        string $selector,
+        string $idValidationMessage
+    ) {
         // Initial User
-        $user = $this->createAuthorizedUser();
+        $this->createUser();
+        $updatedUser = UserFactory::createOne();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_POST, sprintf('/users/%d/edit', $user->getId()));
+        $crawler = $this->client->request(Request::METHOD_POST, sprintf('/users/%d/edit', $updatedUser->getId()));
 
         // Form
-        $form = $crawler->selectButton('Modifier')->form([
-            'user[username]' => null,
-            'user[plainPassword][first]' => 'todolist_updated',
-            'user[plainPassword][second]' => 'todolist_updated',
-            'user[email]' => null
+        $crawler = $this->submitEditForm($crawler, [
+            $fieldName => $fieldValue,
         ]);
-        $crawler = $this->client->submit($form);
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         // Errors
-        $usernameError = $crawler->filter('.help-block')->first()->text();
-        $this->assertEquals('Vous devez saisir un nom d\'utilisateur.', $usernameError);
-        $emailError = $crawler->filter('.help-block')->last()->text();
-        $this->assertEquals('Vous devez saisir une adresse email.', $emailError);
+        $fieldError = $crawler->filter($selector)->siblings()->filter('.help-block')->text();
+        $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
+    }
+
+    /**
+     * @dataProvider getPasswordValidationErrors()
+     */
+    public function testUserPOSTEditWithErrorsPassword(
+        ?string $firstPasswordValue,
+        ?string $secondPasswordValue,
+        string $idValidationMessage
+    ) {
+        // Initial User
+        $user = $this->createUser();
+
+        // Request
+        $crawler = $this->client->request(Request::METHOD_POST, sprintf('/users/%d/edit', $user->getId()));
+
+        // Form
+        $crawler = $this->submitEditForm($crawler, [
+            'user[plainPassword][first]' => $firstPasswordValue,
+            'user[plainPassword][second]' => $secondPasswordValue,
+        ]);
+
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        // Errors
+        $passwordError = $crawler->filter('#user_plainPassword_first')->siblings()->filter('.help-block')->text();
+        $this->assertEquals($this->getValidationMessage($idValidationMessage), $passwordError);
     }
 
     /**
@@ -226,6 +285,73 @@ class UserControllerTest extends BaseWebTestCase
     {
         return [
             ['/users/fake/edit'],
+        ];
+    }
+
+    public function getValidationErrors(): array
+    {
+        $usernameField = 'user[username]';
+        $usernameSelector = 'input[type=text]#user_username';
+        $emailField = 'user[email]';
+        $emailSelector = 'input[type=email]#user_email';
+
+        // fieldName, fieldValue, selector, idValidationMessage
+        return [
+            // Username not blank
+            [
+                $usernameField,
+                null,
+                $usernameSelector,
+                'user.username.not_blank'
+            ],
+            // Username max length
+            [
+                $usernameField,
+                str_repeat('a', 26),
+                $usernameSelector,
+                'user.username.max'
+            ],
+            // Username unique
+            [
+                $usernameField,
+                'user_username',
+                $usernameSelector,
+                'user.username.unique'
+            ],
+            // Email not blank
+            [
+                $emailField,
+                null,
+                $emailSelector,
+                'user.email.not_blank'
+            ],
+            // Email max length
+            [
+                $emailField,
+                sprintf("%s@%s.fr", str_repeat('e', 30), str_repeat('e', 30)),
+                $emailSelector,
+                'user.email.max'
+            ],
+            // Email unique
+            [
+                $emailField,
+                'user_username@todolist.fr',
+                $emailSelector,
+                'user.email.unique'
+            ],
+        ];
+    }
+
+    public function getPasswordValidationErrors(): array
+    {
+        // firstPasswordValue, secondPasswordValue, idValidationMessage
+        return [
+            // Password not blank
+            [null, null, 'user.password.not_blank'],
+            // Password identical
+            ['password', 'password_not_same', 'user.password.fields'],
+            // Password max length
+            [str_repeat('a', 65), str_repeat('a', 65), 'user.password.max'],
         ];
     }
 }

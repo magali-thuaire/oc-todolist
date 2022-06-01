@@ -10,7 +10,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Table('user')]
 #[ORM\Entity]
-#[UniqueEntity('email')]
+#[UniqueEntity('username', message: 'user.username.unique')]
+#[UniqueEntity('email', message: 'user.email.unique')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Column]
@@ -19,17 +20,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 25, unique: true)]
-    #[Assert\NotBlank(message: "Vous devez saisir un nom d'utilisateur.")]
+    #[Assert\Length(max: 25, maxMessage: 'user.username.max')]
+    #[Assert\NotBlank(message: 'user.username.not_blank')]
     private ?string $username = null;
 
     #[ORM\Column]
     private ?string $password = null;
 
+    #[Assert\NotBlank(message: 'user.password.not_blank')]
+    #[Assert\Length(max: 64, maxMessage: 'user.password.max')]
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 60, unique: true)]
-    #[Assert\NotBlank(message: 'Vous devez saisir une adresse email.')]
-    #[Assert\Email(message: "Le format de l'adresse n'est pas correcte.")]
+    #[Assert\Length(max: 60, maxMessage: 'user.email.max')]
+    #[Assert\NotBlank(message: 'user.email.not_blank')]
+    #[Assert\Email(message: 'user.email.type')]
     private ?string $email = null;
 
     public function getId(): ?int
