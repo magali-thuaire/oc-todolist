@@ -20,7 +20,7 @@ class TaskController extends AbstractController
     ) {
     }
 
-    #[Route(path: '/tasks', name: 'task_list')]
+    #[Route(path: '/tasks', name: 'task_list', methods: 'GET')]
     public function listAction(): Response
     {
         return $this->render('task/list.html.twig', [
@@ -28,7 +28,7 @@ class TaskController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/tasks/create', name: 'task_create')]
+    #[Route(path: '/tasks/create', name: 'task_create', methods: ['GET', 'POST'])]
     public function createAction(Request $request): RedirectResponse|Response
     {
         $task = new Task();
@@ -48,7 +48,7 @@ class TaskController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/tasks/{id}/edit', name: 'task_edit')]
+    #[Route(path: '/tasks/{id}/edit', name: 'task_edit', methods: ['GET', 'POST'])]
     public function editAction(Task $task, Request $request): RedirectResponse|Response
     {
         $form = $this->createForm(TaskType::class, $task);
@@ -67,7 +67,7 @@ class TaskController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/tasks/{id}/toggle', name: 'task_toggle')]
+    #[Route(path: '/tasks/{id}/toggle', name: 'task_toggle', methods: 'GET')]
     public function toggleTaskAction(Task $task): RedirectResponse
     {
         $task->toggle(!$task->isDone());
@@ -77,7 +77,7 @@ class TaskController extends AbstractController
         return $this->redirectToRoute('task_list');
     }
 
-    #[Route(path: '/tasks/{id}/delete', name: 'task_delete')]
+    #[Route(path: '/tasks/{id}/delete', name: 'task_delete', methods: 'GET')]
     public function deleteTaskAction(Task $task): RedirectResponse
     {
         $this->em->remove($task);
