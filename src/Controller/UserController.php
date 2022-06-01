@@ -36,9 +36,13 @@ class UserController extends AbstractController
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $this->userPasswordHasher->hashPassword($user, $user->getPassword());
-            $user->setPassword($password);
+            $password = $this->userPasswordHasher->hashPassword($user, $user->getPlainPassword());
+            $user
+                ->setPassword($password)
+                ->eraseCredentials()
+            ;
 
             $this->em->persist($user);
             $this->em->flush();
@@ -58,9 +62,13 @@ class UserController extends AbstractController
     {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $this->userPasswordHasher->hashPassword($user, $user->getPassword());
-            $user->setPassword($password);
+            $password = $this->userPasswordHasher->hashPassword($user, $user->getPlainPassword());
+            $user
+                ->setPassword($password)
+                ->eraseCredentials()
+            ;
 
             $this->em->flush();
 

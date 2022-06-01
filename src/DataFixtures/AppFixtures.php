@@ -16,7 +16,7 @@ class AppFixtures extends Fixture
            ->withAttributes([
                'email' => 'magali@todolist.fr',
                'username' => 'magali',
-               'password' => 'todolist',
+               'plainPassword' => 'todolist',
            ])
            ->create();
 

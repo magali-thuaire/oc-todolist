@@ -37,7 +37,7 @@ final class UserFactory extends ModelFactory
         return [
             'username' => self::faker()->text(25),
             'email' => self::faker()->email(),
-            'password' => self::faker()->text(),
+            'plainPassword' => self::faker()->text(),
         ];
     }
 
@@ -46,7 +46,7 @@ final class UserFactory extends ModelFactory
         // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
         return $this
             ->afterInstantiate(function (User $user): void {
-                if ($plainPassword = $user->getPassword()) {
+                if ($plainPassword = $user->getPlainPassword()) {
                     $user->setPassword($this->userPasswordHasher->hashPassword($user, $plainPassword));
                     $user->eraseCredentials();
                 }
