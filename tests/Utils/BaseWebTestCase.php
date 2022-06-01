@@ -14,7 +14,7 @@ use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
-use Symfony\Component\Translation\IdentityTranslator;
+use Symfony\Component\Translation\DataCollectorTranslator;
 
 class BaseWebTestCase extends WebTestCase
 {
@@ -46,7 +46,7 @@ class BaseWebTestCase extends WebTestCase
         return $this->client->getContainer()->get('security.user_password_hasher');
     }
 
-    protected function getTranslator(): ?IdentityTranslator
+    protected function getTranslator(): ?DataCollectorTranslator
     {
         return $this->client->getContainer()->get('translator');
     }
