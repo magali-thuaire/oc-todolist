@@ -25,7 +25,7 @@ class TaskControllerTest extends BaseWebTestCase
         $firstTaskFixture = current($tasksFixture);
 
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks');
@@ -94,7 +94,7 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETCreateAuthorized()
     {
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
@@ -141,7 +141,7 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskPOSTCreateAuthorized()
     {
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
@@ -173,7 +173,7 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskPOSTCreateAuthorizedWithErrors()
     {
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
@@ -201,7 +201,7 @@ class TaskControllerTest extends BaseWebTestCase
         $task = $this->createTask();
 
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
@@ -230,7 +230,7 @@ class TaskControllerTest extends BaseWebTestCase
         $task = $this->createTask();
 
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
@@ -266,7 +266,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->createTask();
 
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
@@ -295,7 +295,7 @@ class TaskControllerTest extends BaseWebTestCase
         $isDone = $task->isDone();
 
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $task->getId()));
@@ -338,7 +338,7 @@ class TaskControllerTest extends BaseWebTestCase
         $taskId = $task->getId();
 
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/delete', $task->getId()));

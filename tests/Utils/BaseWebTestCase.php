@@ -10,9 +10,11 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
+use Symfony\Component\Translation\IdentityTranslator;
 
 class BaseWebTestCase extends WebTestCase
 {
@@ -44,6 +46,16 @@ class BaseWebTestCase extends WebTestCase
         return $this->client->getContainer()->get('security.user_password_hasher');
     }
 
+    protected function getTranslator(): ?IdentityTranslator
+    {
+        return $this->client->getContainer()->get('translator');
+    }
+
+    protected function getValidationMessage(string $id, array $params = []): ?string
+    {
+        return $this->getTranslator()->trans($id, $params, 'validators');
+    }
+
     protected function unauthorizedAction($uri)
     {
         // Request
@@ -60,7 +72,7 @@ class BaseWebTestCase extends WebTestCase
     public function notFound404Exception($uri)
     {
         // Logged User
-        $this->createAuthorizedUserAndLogin();
+        $this->createUserAndLogin();
 
         // Request
         $this->client->request(Request::METHOD_GET, $uri);
@@ -75,7 +87,7 @@ class BaseWebTestCase extends WebTestCase
         $purger->purge();
     }
 
-    protected function createAuthorizedUser(): User
+    protected function createUser(): User
     {
         return UserFactory::new()
             ->withAttributes([
@@ -87,10 +99,24 @@ class BaseWebTestCase extends WebTestCase
             ->object();
     }
 
-    protected function createAuthorizedUserAndLogin(): void
+    protected function createUserAndLogin(): void
     {
-        $user = $this->createAuthorizedUser();
+        $user = $this->createUser();
 
         $this->client->loginUser($user);
+    }
+
+    protected function submitCreateForm(Crawler $crawler, array $fields): Crawler
+    {
+        $form = $crawler->selectButton('Ajouter')->form($fields);
+
+        return $this->client->submit($form);
+    }
+
+    protected function submitEditForm(Crawler $crawler, array $fields): Crawler
+    {
+        $form = $crawler->selectButton('Modifier')->form($fields);
+
+        return $this->client->submit($form);
     }
 }

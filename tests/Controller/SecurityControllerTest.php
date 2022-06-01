@@ -53,7 +53,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/login');
 
         // User
-        $user = $this->createAuthorizedUser();
+        $user = $this->createUser();
 
         // Form
         $form = $crawler->selectButton('Se connecter')->form([
@@ -75,7 +75,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/login');
 
         // User
-        $this->createAuthorizedUser();
+        $this->createUser();
 
         // Form
         $form = $crawler->selectButton('Se connecter')->form([
