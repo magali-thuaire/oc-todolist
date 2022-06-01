@@ -147,11 +147,10 @@ class TaskControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
 
         // Form
-        $form = $crawler->selectButton('Ajouter')->form([
+        $this->submitCreateForm($crawler, [
             'task[title]' => 'task_title',
             'task[content]' => 'task_content',
         ]);
-        $this->client->submit($form);
 
         // Redirection
         $this->assertResponseRedirects();
@@ -170,8 +169,16 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('task_content', $createdTask->getContent());
     }
 
-    public function testTaskPOSTCreateAuthorizedWithErrors()
-    {
+    /**
+     * @dataProvider getValidationErrors()
+     */
+    public function testTaskPOSTCreateAuthorizedWithErrors(
+        string $fieldName,
+        ?string $fieldValue,
+        string $selector,
+        string $idValidationMessage
+    ) {
+
         // Logged User
         $this->createUserAndLogin();
 
@@ -179,20 +186,16 @@ class TaskControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
 
         // Form
-        $form = $crawler->selectButton('Ajouter')->form([
-            'task[title]' => '',
-            'task[content]' => '',
+        $crawler = $this->submitCreateForm($crawler, [
+            $fieldName => $fieldValue,
         ]);
-        $crawler = $this->client->submit($form);
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         // Errors
-        $titleError = $crawler->filter('.help-block')->first()->text();
-        $this->assertEquals('Vous devez saisir un titre.', $titleError);
-        $contentError = $crawler->filter('.help-block')->last()->text();
-        $this->assertEquals('Vous devez saisir du contenu.', $contentError);
+        $fieldError = $crawler->filter($selector)->siblings()->filter('.help-block')->text();
+        $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
     }
 
     public function testTaskGETEditAuthorized()
@@ -236,11 +239,10 @@ class TaskControllerTest extends BaseWebTestCase
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
 
         // Form
-        $form = $crawler->selectButton('Modifier')->form([
+        $this->submitEditForm($crawler, [
             'task[title]' => 'task_title_updated',
             'task[content]' => 'task_content_updated',
         ]);
-        $this->client->submit($form);
 
         // Redirection
         $this->assertResponseRedirects();
@@ -260,32 +262,36 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('task_content_updated', $updatedTask->getContent());
     }
 
-    public function testTaskPOSTEditAuthorizedWithErrors()
-    {
+    /**
+     * @dataProvider getValidationErrors()
+     */
+    public function testTaskPOSTEditAuthorizedWithErrors(
+        string $fieldName,
+        ?string $fieldValue,
+        string $selector,
+        string $idValidationMessage
+    ) {
         // Initial Task
         $this->createTask();
+        $updatedTask = TaskFactory::createOne();
 
         // Logged User
         $this->createUserAndLogin();
 
         // Request
-        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
+        $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $updatedTask->getId()));
 
         // Form
-        $form = $crawler->selectButton('Ajouter')->form([
-            'task[title]' => '',
-            'task[content]' => '',
+        $crawler = $this->submitEditForm($crawler, [
+            $fieldName => $fieldValue,
         ]);
-        $crawler = $this->client->submit($form);
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         // Errors
-        $titleError = $crawler->filter('.help-block')->first()->text();
-        $this->assertEquals('Vous devez saisir un titre.', $titleError);
-        $contentError = $crawler->filter('.help-block')->last()->text();
-        $this->assertEquals('Vous devez saisir du contenu.', $contentError);
+        $fieldError = $crawler->filter($selector)->siblings()->filter('.help-block')->text();
+        $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
     }
 
     public function testTaskGETToggleAuthorized()
@@ -388,5 +394,31 @@ class TaskControllerTest extends BaseWebTestCase
                     ])
                     ->create()
                     ->object();
+    }
+
+    public function getValidationErrors(): array
+    {
+        $titleField = 'task[title]';
+        $titleSelector = 'input[type=text]#task_title';
+        $contentField = 'task[content]';
+        $contentSelector = 'textarea#task_content';
+
+        // fieldName, fieldValue, selector, idValidationMessage
+        return [
+            // Title not blank
+            [
+                $titleField,
+                null,
+                $titleSelector,
+                'task.title.not_blank'
+            ],
+            // Content not blank
+            [
+                $contentField,
+                null,
+                $contentSelector,
+                'task.content.not_blank'
+            ],
+        ];
     }
 }
