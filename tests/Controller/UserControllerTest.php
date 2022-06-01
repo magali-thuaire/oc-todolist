@@ -52,8 +52,8 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($form = $crawler->filter('form'));
         $this->assertEquals($newUserUri, $form->attr('action'));
         $this->assertSelectorExists('input[type=text]#user_username');
-        $this->assertSelectorExists('input[type=password]#user_password_first');
-        $this->assertSelectorExists('input[type=password]#user_password_second');
+        $this->assertSelectorExists('input[type=password]#user_plainPassword_first');
+        $this->assertSelectorExists('input[type=password]#user_plainPassword_second');
         $this->assertSelectorExists('input[type=email]#user_email');
 
         // Submit button
@@ -68,8 +68,8 @@ class UserControllerTest extends BaseWebTestCase
         // Form
         $form = $crawler->selectButton('Ajouter')->form([
             'user[username]' => 'test',
-            'user[password][first]' => 'todolist',
-            'user[password][second]' => 'todolist',
+            'user[plainPassword][first]' => 'todolist',
+            'user[plainPassword][second]' => 'todolist',
             'user[email]' => 'test@totdolist.fr'
         ]);
         $this->client->submit($form);
@@ -100,8 +100,8 @@ class UserControllerTest extends BaseWebTestCase
         // Form
         $form = $crawler->selectButton('Ajouter')->form([
             'user[username]' => null,
-            'user[password][first]' => 'todolist',
-            'user[password][second]' => 'todolist',
+            'user[plainPassword][first]' => 'todolist',
+            'user[plainPassword][second]' => 'todolist',
             'user[email]' => null
         ]);
         $crawler = $this->client->submit($form);
@@ -145,8 +145,8 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals($updateUserUri, $form->attr('action'));
 
         $this->assertSelectorExists('input[type=text]#user_username');
-        $this->assertSelectorExists('input[type=password]#user_password_first');
-        $this->assertSelectorExists('input[type=password]#user_password_second');
+        $this->assertSelectorExists('input[type=password]#user_plainPassword_first');
+        $this->assertSelectorExists('input[type=password]#user_plainPassword_second');
 
         // Submit button
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Modifier');
@@ -163,8 +163,8 @@ class UserControllerTest extends BaseWebTestCase
         // Form
         $form = $crawler->selectButton('Modifier')->form([
             'user[username]' => 'user_username_updated',
-            'user[password][first]' => 'user_password_updated',
-            'user[password][second]' => 'user_password_updated',
+            'user[plainPassword][first]' => 'user_password_updated',
+            'user[plainPassword][second]' => 'user_password_updated',
             'user[email]' => 'user_email_updated@todolist.fr'
         ]);
         $this->client->submit($form);
@@ -198,8 +198,8 @@ class UserControllerTest extends BaseWebTestCase
         // Form
         $form = $crawler->selectButton('Modifier')->form([
             'user[username]' => null,
-            'user[password][first]' => 'todolist_updated',
-            'user[password][second]' => 'todolist_updated',
+            'user[plainPassword][first]' => 'todolist_updated',
+            'user[plainPassword][second]' => 'todolist_updated',
             'user[email]' => null
         ]);
         $crawler = $this->client->submit($form);

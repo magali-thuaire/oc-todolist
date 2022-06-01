@@ -81,7 +81,7 @@ class BaseWebTestCase extends WebTestCase
             ->withAttributes([
                 'username' => 'user_username',
                 'email' => 'user_username@todolist.fr',
-                'password' => 'todolist'
+                'plainPassword' => 'todolist'
             ])
             ->create()
             ->object();
