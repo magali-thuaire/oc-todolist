@@ -44,9 +44,11 @@ class Task
         return $this->createdAt;
     }
 
-    public function setCreatedAt(Datetime $createdAt)
+    public function setCreatedAt(Datetime $createdAt): self
     {
         $this->createdAt = $createdAt;
+
+        return $this;
     }
 
     public function getTitle(): ?string
@@ -54,9 +56,11 @@ class Task
         return $this->title;
     }
 
-    public function setTitle(?string $title)
+    public function setTitle(?string $title): self
     {
         $this->title = $title;
+
+        return $this;
     }
 
     public function getContent(): ?string
@@ -64,9 +68,11 @@ class Task
         return $this->content;
     }
 
-    public function setContent(?string $content)
+    public function setContent(?string $content): self
     {
         $this->content = $content;
+
+        return $this;
     }
 
     public function isDone(): bool
@@ -74,8 +80,10 @@ class Task
         return $this->isDone;
     }
 
-    public function toggle(bool $flag)
+    public function toggle(bool $flag): self
     {
         $this->isDone = $flag;
+
+        return $this;
     }
 }
