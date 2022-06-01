@@ -19,11 +19,11 @@ class Task
     private Datetime $createdAt;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Vous devez saisir un titre.')]
+    #[Assert\NotBlank(message: 'task.title.not_blank')]
     private ?string $title = null;
 
     #[ORM\Column(type: 'text')]
-    #[Assert\NotBlank(message: 'Vous devez saisir du contenu.')]
+    #[Assert\NotBlank(message: 'task.content.not_blank')]
     private ?string $content = null;
 
     #[ORM\Column]
