@@ -20,9 +20,18 @@ class TaskControllerTest extends BaseWebTestCase
 
     public function testTaskGETListAuthorized()
     {
-        // Tasks
-        $tasksFixture = TaskFactory::createMany(5);
-        $firstTaskFixture = current($tasksFixture);
+        // Undone Tasks
+        $undoneTasksFixture = TaskFactory::createMany(
+            5,
+            ['isDone' => false]
+        );
+        $firstTaskFixture = end($undoneTasksFixture);
+
+        // Done Tasks
+        TaskFactory::createMany(
+            5,
+            ['isDone' => true]
+        );
 
         // Logged User
         $this->createUserAndLogin();
@@ -50,7 +59,7 @@ class TaskControllerTest extends BaseWebTestCase
 //        $this->assertEquals('Se déconnecter', $newUserButton->text());
 
         // New Task button
-        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
+        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-success'));
 
         $newUserUri = $this->getRouter()->generate('task_create');
 
@@ -84,11 +93,69 @@ class TaskControllerTest extends BaseWebTestCase
         $toggleBtn = $firstTask->filter('button.btn.btn-success');
 
         $this->assertEquals($toggleTaskUri, $toggleTaskForm->attr('action'));
-        if ($firstTaskFixture->isDone()) {
-            $this->assertEquals('Marquer non terminée', $toggleBtn->text());
-        } else {
-            $this->assertEquals('Marquer comme faite', $toggleBtn->text());
-        }
+        $this->assertEquals('Marquer comme faite', $toggleBtn->text());
+    }
+
+    public function testTaskGETDoneListAuthorized()
+    {
+        // Undone Tasks
+        $doneTasksFixture = TaskFactory::createMany(
+            5,
+            ['isDone' => true]
+        );
+        $firstTaskFixture = end($doneTasksFixture);
+
+        // Done Tasks
+        TaskFactory::createMany(
+            5,
+            ['isDone' => false]
+        );
+
+        // Logged User
+        $this->createUserAndLogin();
+
+        // Request
+        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/done');
+
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        // New Task button
+        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-success'));
+
+        $newUserUri = $this->getRouter()->generate('task_create');
+
+        $this->assertEquals($newUserUri, $newUserButton->attr('href'));
+        $this->assertEquals('Créer une tâche', $newUserButton->text());
+
+        // Tasks
+        $this->assertCount(5, $crawler->filter('div.thumbnail'));
+
+        // First Task
+        $firstTask = $crawler->filter('div.thumbnail')->first();
+
+        // First Task - Edit
+        $editTaskLink = $firstTask->filter('h4 > a');
+        $editTaskUri = $this->getRouter()->generate('task_edit', ['id' => $firstTaskFixture->getId()]);
+
+        $this->assertEquals($editTaskUri, $editTaskLink->attr('href'));
+        $this->assertEquals($firstTaskFixture->getTitle(), $editTaskLink->text());
+
+        // First Task - Delete
+        $deleteTaskForm = $firstTask->filter('form')->last();
+        $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
+        $deleteBtn = $firstTask->filter('button.btn.btn-danger');
+
+        $this->assertEquals($deleteTaskUri, $deleteTaskForm->attr('action'));
+        $this->assertEquals('Supprimer', $deleteBtn->text());
+
+        // First Task - Toggle
+        $toggleTaskForm = $firstTask->filter('form')->first();
+        $toggleTaskUri = $this->getRouter()->generate('task_toggle', ['id' => $firstTaskFixture->getId()]);
+        $toggleBtn = $firstTask->filter('button.btn.btn-success');
+
+        $this->assertEquals($toggleTaskUri, $toggleTaskForm->attr('action'));
+        $this->assertEquals('Marquer comme non terminée', $toggleBtn->text());
     }
 
     public function testTaskGETCreateAuthorized()
@@ -294,10 +361,12 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
     }
 
-    public function testTaskGETToggleAuthorized()
+    public function testTaskGETUndoneToggleAuthorized()
     {
-        // Initial Task
-        $initialTask = $this->createTask();
+        // Initial Undone Task
+        $initialTask = TaskFactory::createOne([
+            'isDone' => false
+        ]);
 
         // Logged User
         $this->createUserAndLogin();
@@ -306,33 +375,56 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $initialTask->getId()));
 
         // Redirection
-        $this->assertResponseRedirects();
+        $undoneTaskUrl = $this->getRouter()->generate('task_list');
+        $this->assertResponseRedirects($undoneTaskUrl);
         $this->client->followRedirect();
 
-        if (!$initialTask->isDone()) {
-            $this->assertSelectorTextContains(
-                'div.alert.alert-success',
-                $this->getTranslator()->trans(
-                    'task.toggle.done.success',
-                    ['task.title' => $initialTask->getTitle()],
-                    'flashes'
-                )
-            );
-        } else {
-            $this->assertSelectorTextContains(
-                'div.alert.alert-success',
-                $this->getTranslator()->trans(
-                    'task.toggle.undone.success',
-                    ['task.title' => $initialTask->getTitle()],
-                    'flashes'
-                )
-            );
-        }
+        $this->assertSelectorTextContains(
+            'div.alert.alert-success',
+            $this->getTranslator()->trans(
+                'task.toggle.done.success',
+                ['task.title' => $initialTask->getTitle()],
+                'flashes'
+            )
+        );
 
         // Toggled Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
         $toggledTask = $taskRepository->findOneBy(['id' => $initialTask->getId()]);
-        $this->assertEquals(!$initialTask->isDone(), $toggledTask->isDone());
+        $this->assertTrue($toggledTask->isDone());
+    }
+
+    public function testTaskGETDoneToggleAuthorized()
+    {
+        // Initial Done Task
+        $initialTask = TaskFactory::createOne([
+            'isDone' => true
+        ]);
+
+        // Logged User
+        $this->createUserAndLogin();
+
+        // Request
+        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $initialTask->getId()));
+
+        // Redirection
+        $doneTaskUrl = $this->getRouter()->generate('task_list_done');
+        $this->assertResponseRedirects($doneTaskUrl);
+        $this->client->followRedirect();
+
+        $this->assertSelectorTextContains(
+            'div.alert.alert-success',
+            $this->getTranslator()->trans(
+                'task.toggle.undone.success',
+                ['task.title' => $initialTask->getTitle()],
+                'flashes'
+            )
+        );
+
+        // Toggled Task
+        $taskRepository = $this->getDoctrine()->getRepository(Task::class);
+        $toggledTask = $taskRepository->findOneBy(['id' => $initialTask->getId()]);
+        $this->assertFalse($toggledTask->isDone());
     }
 
     /**
@@ -393,12 +485,10 @@ class TaskControllerTest extends BaseWebTestCase
 
     private function createTask(): Task
     {
-        return TaskFactory::new()
-                    ->withAttributes([
+        return TaskFactory::createOne([
                        'title' => 'task_title',
                        'content' => 'task_content',
                     ])
-                    ->create()
                     ->object();
     }
 

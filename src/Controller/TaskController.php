@@ -25,8 +25,29 @@ class TaskController extends AbstractController
     #[Route(path: '/tasks', name: 'task_list', methods: 'GET')]
     public function listAction(): Response
     {
+        $undoneTasks = $this->managerRegistry
+            ->getRepository(Task::class)
+             ->findBy(
+                 ['isDone' => false],
+                 ['id' => 'DESC' ]
+             );
         return $this->render('task/list.html.twig', [
-            'tasks' => $this->managerRegistry->getRepository(Task::class)->findAll(),
+            'tasks' => $undoneTasks,
+        ]);
+    }
+
+    #[Route(path: '/tasks/done', name: 'task_list_done', methods: 'GET')]
+    public function listDoneAction(): Response
+    {
+        $doneTasks = $this->managerRegistry
+            ->getRepository(Task::class)
+            ->findBy(
+                ['isDone' => true],
+                ['id' => 'DESC']
+            );
+
+        return $this->render('task/list.html.twig', [
+            'tasks' => $doneTasks,
         ]);
     }
 
@@ -78,20 +99,21 @@ class TaskController extends AbstractController
     #[Route(path: '/tasks/{id}/toggle', name: 'task_toggle', methods: 'GET')]
     public function toggleTaskAction(Task $task): RedirectResponse
     {
-        $task->toggle(!$task->isDone());
+        $task->toggle();
         $this->em->flush();
 
-        if ($task->isDone()) {
-            $this->addFlash(
-                'success',
-                $this->translator->trans('task.toggle.done.success', ['task.title' => $task->getTitle()], 'flashes')
-            );
-        } else {
+        if (!$task->isDone()) {
             $this->addFlash(
                 'success',
                 $this->translator->trans('task.toggle.undone.success', ['task.title' => $task->getTitle()], 'flashes')
             );
+            return $this->redirectToRoute('task_list_done');
         }
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans('task.toggle.done.success', ['task.title' => $task->getTitle()], 'flashes')
+        );
 
         return $this->redirectToRoute('task_list');
     }

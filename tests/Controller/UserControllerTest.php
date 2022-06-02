@@ -19,7 +19,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         // New User button
-        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
+        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
         $newUserUri = $this->getRouter()->generate('user_create');
 
@@ -39,7 +39,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         // New User button
-        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
+        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
         $newUserUri = $this->getRouter()->generate('user_create');
 
