@@ -1,0 +1,24 @@
+.caption {
+    height: 130px;
+    overflow: hidden;
+
+    h4 {
+        white-space: nowrap;
+    }
+}
+
+.thumbnail {
+    padding: 0;
+
+    img {
+        width: 100%;
+    }
+}
+
+.alert {
+    &.no_task {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
