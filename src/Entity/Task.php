@@ -29,6 +29,9 @@ class Task
     #[ORM\Column]
     private bool $isDone = false;
 
+    public const DONE_ACTION = 'Marquer comme faite';
+    public const UNDONE_ACTION = 'Marquer comme non terminée';
+
     public function __construct()
     {
         $this->createdAt = new Datetime();
@@ -80,9 +83,16 @@ class Task
         return $this->isDone;
     }
 
-    public function toggle(bool $flag): self
+    public function setIsDone(bool $isDone): self
     {
-        $this->isDone = $flag;
+        $this->isDone = $isDone;
+
+        return $this;
+    }
+
+    public function toggle(): self
+    {
+        $this->isDone = !$this->isDone;
 
         return $this;
     }

@@ -64,7 +64,6 @@ class BaseWebTestCase extends WebTestCase
         $loginUrl = $this->getRouter()->generate('login', [], 0);
 
         // Response
-        $this->assertTrue($this->client->getResponse()->isRedirect($loginUrl));
         $this->assertResponseRedirects($loginUrl);
         $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
     }
@@ -89,13 +88,11 @@ class BaseWebTestCase extends WebTestCase
 
     protected function createUser(): User
     {
-        return UserFactory::new()
-            ->withAttributes([
+        return UserFactory::createOne([
                 'username' => 'user_username',
                 'email' => 'user_username@todolist.fr',
                 'plainPassword' => 'todolist'
             ])
-            ->create()
             ->object();
     }
 

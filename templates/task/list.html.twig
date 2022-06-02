@@ -5,7 +5,7 @@
 {% block body %}
     <div class="row">
         {% if tasks is not empty %}
-            <a href="{{ path('task_create') }}" class="btn btn-info">Créer une tâche</a>
+            <a href="{{ path('task_create') }}" class="btn btn-success">Créer une tâche</a>
         {% endif %}
     </div>
     <div class="row">
@@ -22,7 +22,11 @@
                 <div>
                     <form action="{{ path('task_toggle', {'id' : task.id }) }}">
                         <button class="btn btn-success btn-sm pull-right">
-                            {% if not task.isDone %}Marquer comme faite{% else %}Marquer non terminée{% endif %}
+                            {% if not task.isDone %}
+                                {{ constant('App\\Entity\\Task::DONE_ACTION') }}
+                            {% else %}
+                                {{ constant('App\\Entity\\Task::UNDONE_ACTION') }}
+                            {% endif %}
                         </button>
                     </form>
                     <form action="{{ path('task_delete', {'id' : task.id }) }}">

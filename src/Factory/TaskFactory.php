@@ -38,18 +38,14 @@ final class TaskFactory extends ModelFactory
             'createdAt' => self::faker()->dateTimeBetween('-30 days', '-15 days'),
             'title' => self::faker()->text(20),
             'content' => self::faker()->paragraph(3),
+            'isDone' => self::faker()->boolean(),
         ];
     }
 
     protected function initialize(): self
     {
         // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-        return $this
-            ->afterInstantiate(function (Task $task): void {
-                if (self::faker()->boolean()) {
-                    $task->toggle(true);
-                }
-            });
+        return $this;
     }
 
     protected static function getClass(): string
