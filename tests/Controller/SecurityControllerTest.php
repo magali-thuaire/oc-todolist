@@ -70,6 +70,29 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->assertEquals($homepageUri, $crawler->getUri());
     }
 
+    public function testSecurityPOSTLoginWithCSRFError()
+    {
+        $crawler = $this->client->request(Request::METHOD_GET, '/login');
+
+        // User
+        $user = $this->createUser();
+
+        // Form
+        $form = $crawler->selectButton('Se connecter')->form([
+            '_username' => $user->getUsername(),
+            '_password' => 'todolist',
+            '_csrf_token' => 'csrf_token_invalid'
+        ]);
+        $this->client->submit($form);
+
+        // Redirection
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
+
+        // Errors
+        $this->assertSelectorTextSame('div.alert.alert-danger', 'Jeton CSRF invalide.');
+    }
+
     public function testSecurityPOSTLoginWithErrors()
     {
         $crawler = $this->client->request(Request::METHOD_GET, '/login');
