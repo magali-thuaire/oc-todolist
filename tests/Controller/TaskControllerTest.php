@@ -297,36 +297,42 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETToggleAuthorized()
     {
         // Initial Task
-        $task = $this->createTask();
-        $isDone = $task->isDone();
+        $initialTask = $this->createTask();
 
         // Logged User
         $this->createUserAndLogin();
 
         // Request
-        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $task->getId()));
+        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $initialTask->getId()));
 
         // Redirection
         $this->assertResponseRedirects();
         $this->client->followRedirect();
 
-        if (!$task->isDone()) {
+        if (!$initialTask->isDone()) {
             $this->assertSelectorTextContains(
                 'div.alert.alert-success',
-                $this->getTranslator()->trans('task.toggle.success', ['title' => $task->getTitle()], 'flashes')
+                $this->getTranslator()->trans(
+                    'task.toggle.done.success',
+                    ['task.title' => $initialTask->getTitle()],
+                    'flashes'
+                )
+            );
+        } else {
+            $this->assertSelectorTextContains(
+                'div.alert.alert-success',
+                $this->getTranslator()->trans(
+                    'task.toggle.undone.success',
+                    ['task.title' => $initialTask->getTitle()],
+                    'flashes'
+                )
             );
         }
-//        else  {
-//            $this->assertSelectorTextSame(
-//                'div.alert.alert-success',
-//                sprintf('Superbe ! La tâche %s a bien été marquée comme non terminée.', $task->getTitle())
-//            );
-//        }
 
         // Toggled Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
-        $toggledTask = $taskRepository->findOneBy(['id' => $task->getId()]);
-        $this->assertEquals(!$isDone, $toggledTask->isDone());
+        $toggledTask = $taskRepository->findOneBy(['id' => $initialTask->getId()]);
+        $this->assertEquals(!$initialTask->isDone(), $toggledTask->isDone());
     }
 
     /**
