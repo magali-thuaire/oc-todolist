@@ -27,6 +27,7 @@ security:
                 check_path: login_check
                 always_use_default_target_path:  true
                 default_target_path:  /
+                enable_csrf: true
             logout: ~
 
             # activate different ways to authenticate
