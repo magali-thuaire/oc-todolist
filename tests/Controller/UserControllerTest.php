@@ -79,9 +79,9 @@ class UserControllerTest extends BaseWebTestCase
         $this->client->followRedirect();
 
         // Success Message
-        $this->assertSelectorTextSame(
+        $this->assertSelectorTextContains(
             'div.alert.alert-success',
-            'Superbe ! L\'utilisateur a bien été ajouté.'
+            $this->getTranslator()->trans('user.create.success', [], 'flashes')
         );
 
         // Created User
@@ -203,9 +203,9 @@ class UserControllerTest extends BaseWebTestCase
         $this->client->followRedirect();
 
         // Success Message
-        $this->assertSelectorTextSame(
+        $this->assertSelectorTextContains(
             'div.alert.alert-success',
-            'Superbe ! L\'utilisateur a bien été modifié'
+            $this->getTranslator()->trans('user.edit.success', [], 'flashes')
         );
 
         // Updated User

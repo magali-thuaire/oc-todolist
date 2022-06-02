@@ -89,7 +89,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->client->followRedirect();
 
         // Errors
-        $this->assertSelectorTextSame('div.alert.alert-danger', 'Invalid credentials.');
+        $this->assertSelectorTextSame('div.alert.alert-danger', 'Identifiants invalides.');
     }
 
     public function getUnauthorizedActions(): array

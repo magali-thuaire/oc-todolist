@@ -157,9 +157,9 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->followRedirect();
 
         // Success Message
-        $this->assertSelectorTextSame(
+        $this->assertSelectorTextContains(
             'div.alert.alert-success',
-            'Superbe ! La tâche a été bien été ajoutée.'
+            $this->getTranslator()->trans('task.create.success', [], 'flashes')
         );
 
         // Created Task
@@ -249,9 +249,9 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->followRedirect();
 
         // Success Message
-        $this->assertSelectorTextSame(
+        $this->assertSelectorTextContains(
             'div.alert.alert-success',
-            'Superbe ! La tâche a bien été modifiée.'
+            $this->getTranslator()->trans('task.edit.success', [], 'flashes')
         );
 
         // Updated Task
@@ -311,9 +311,9 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->followRedirect();
 
         if (!$task->isDone()) {
-            $this->assertSelectorTextSame(
+            $this->assertSelectorTextContains(
                 'div.alert.alert-success',
-                sprintf('Superbe ! La tâche %s a bien été marquée comme faite.', $task->getTitle())
+                $this->getTranslator()->trans('task.toggle.success', ['title' => $task->getTitle()], 'flashes')
             );
         }
 //        else  {
@@ -354,9 +354,9 @@ class TaskControllerTest extends BaseWebTestCase
         $this->client->followRedirect();
 
         // Success Message
-        $this->assertSelectorTextSame(
+        $this->assertSelectorTextContains(
             'div.alert.alert-success',
-            'Superbe ! La tâche a bien été supprimée.'
+            $this->getTranslator()->trans('task.delete.success', [], 'flashes')
         );
 
         // Deleted Task

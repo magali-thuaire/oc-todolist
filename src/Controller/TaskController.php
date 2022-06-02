@@ -11,12 +11,14 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TaskController extends AbstractController
 {
     public function __construct(
         private readonly ManagerRegistry $managerRegistry,
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -38,7 +40,10 @@ class TaskController extends AbstractController
             $this->em->persist($task);
             $this->em->flush();
 
-            $this->addFlash('success', 'La tâche a été bien été ajoutée.');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('task.create.success', [], 'flashes')
+            );
 
             return $this->redirectToRoute('task_list');
         }
@@ -56,7 +61,10 @@ class TaskController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->flush();
 
-            $this->addFlash('success', 'La tâche a bien été modifiée.');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('task.edit.success', [], 'flashes')
+            );
 
             return $this->redirectToRoute('task_list');
         }
@@ -72,8 +80,10 @@ class TaskController extends AbstractController
     {
         $task->toggle(!$task->isDone());
         $this->em->flush();
-        $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
-
+        $this->addFlash(
+            'success',
+            $this->translator->trans('task.toggle.success', ['title' => $task->getTitle()], 'flashes')
+        );
         return $this->redirectToRoute('task_list');
     }
 
@@ -82,7 +92,10 @@ class TaskController extends AbstractController
     {
         $this->em->remove($task);
         $this->em->flush();
-        $this->addFlash('success', 'La tâche a bien été supprimée.');
+        $this->addFlash(
+            'success',
+            $this->translator->trans('task.delete.success', [], 'flashes')
+        );
 
         return $this->redirectToRoute('task_list');
     }

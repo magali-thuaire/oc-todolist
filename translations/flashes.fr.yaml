@@ -1,0 +1,6 @@
+user.create.success: "L'utilisateur a bien été ajouté."
+user.edit.success: "L'utilisateur a bien été modifié."
+task.create.success: "La tâche a été bien été ajoutée."
+task.edit.success: "La tâche a bien été modifiée."
+task.toggle.success: "La tâche {{ title }} a bien été marquée comme faite."
+task.delete.success: "La tâche a bien été supprimée."
