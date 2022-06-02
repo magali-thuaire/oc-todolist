@@ -13,8 +13,8 @@ class AppFixtures extends Fixture
     {
         // Users
         UserFactory::createOne([
-               'email' => 'magali@todolist.fr',
-               'username' => 'magali',
+               'email' => 'user@todolist.fr',
+               'username' => 'user',
                'plainPassword' => 'todolist',
            ]);
 
