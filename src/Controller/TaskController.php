@@ -80,10 +80,19 @@ class TaskController extends AbstractController
     {
         $task->toggle(!$task->isDone());
         $this->em->flush();
-        $this->addFlash(
-            'success',
-            $this->translator->trans('task.toggle.success', ['title' => $task->getTitle()], 'flashes')
-        );
+
+        if ($task->isDone()) {
+            $this->addFlash(
+                'success',
+                $this->translator->trans('task.toggle.done.success', ['task.title' => $task->getTitle()], 'flashes')
+            );
+        } else {
+            $this->addFlash(
+                'success',
+                $this->translator->trans('task.toggle.undone.success', ['task.title' => $task->getTitle()], 'flashes')
+            );
+        }
+
         return $this->redirectToRoute('task_list');
     }
 
