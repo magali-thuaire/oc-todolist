@@ -12,13 +12,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UserController extends AbstractController
 {
     public function __construct(
         private readonly ManagerRegistry $managerRegistry,
         private readonly EntityManagerInterface $em,
-        private readonly UserPasswordHasherInterface $userPasswordHasher
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -47,7 +49,10 @@ class UserController extends AbstractController
             $this->em->persist($user);
             $this->em->flush();
 
-            $this->addFlash('success', "L'utilisateur a bien été ajouté.");
+            $this->addFlash(
+                'success',
+                $this->translator->trans('user.create.success', [], 'flashes')
+            );
 
             return $this->redirectToRoute('user_list');
         }
@@ -72,7 +77,10 @@ class UserController extends AbstractController
 
             $this->em->flush();
 
-            $this->addFlash('success', "L'utilisateur a bien été modifié");
+            $this->addFlash(
+                'success',
+                $this->translator->trans('user.edit.success', [], 'flashes')
+            );
 
             return $this->redirectToRoute('user_list');
         }
