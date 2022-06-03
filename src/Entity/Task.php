@@ -29,6 +29,10 @@ class Task
     #[ORM\Column]
     private bool $isDone = false;
 
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $owner = null;
+
     public const DONE_ACTION = 'Marquer comme faite';
     public const UNDONE_ACTION = 'Marquer comme non terminée';
 
@@ -93,6 +97,18 @@ class Task
     public function toggle(): self
     {
         $this->isDone = !$this->isDone;
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): self
+    {
+        $this->owner = $owner;
 
         return $this;
     }
