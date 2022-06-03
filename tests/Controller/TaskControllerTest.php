@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Task;
+use App\Entity\User;
 use App\Factory\TaskFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,34 +14,22 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getUnauthorizedActions
      */
-    public function testUnauthorizedAction($uri)
+    public function testUnauthorizedAction(string $method, string $uri)
     {
-        $this->unauthorizedAction($uri);
+        $this->unauthorizedAction($method, $uri);
     }
 
     public function testTaskGETListAuthorized()
     {
         // Logged User
-        $user = $this->createUserAndLogin();
+        $this->createUserAndLogin();
 
-        // Undone Tasks
-        $undoneTasksFixture = TaskFactory::createMany(
-            5,
-            [
-                'owner' => $user,
-                'isDone' => false
-            ]
-        );
+        // Undone Tasks owned by user
+        $undoneTasksFixture = $this->createTasks(5, false);
         $firstTaskFixture = end($undoneTasksFixture);
 
         // Done Tasks
-        TaskFactory::createMany(
-            5,
-            [
-                'owner' => $user,
-                'isDone' => true
-            ]
-        );
+        $this->createTasks(5, true);
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks');
@@ -105,26 +94,14 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETDoneListAuthorized()
     {
         // Logged User
-        $user = $this->createUserAndLogin();
+        $this->createUserAndLogin();
 
-        // Undone Tasks
-        $doneTasksFixture = TaskFactory::createMany(
-            5,
-            [
-                'owner' => $user,
-                'isDone' => true
-            ]
-        );
+        // Undone Tasks owned by user
+        $doneTasksFixture = $this->createTasks(5, true);
         $firstTaskFixture = end($doneTasksFixture);
 
-        // Done Tasks
-        TaskFactory::createMany(
-            5,
-            [
-                'owner' => $user,
-                'isDone' => false
-            ]
-        );
+        // Done Tasks owned by user
+        $this->createTasks(5, false);
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/done');
@@ -280,11 +257,11 @@ class TaskControllerTest extends BaseWebTestCase
 
     public function testTaskGETEditAuthorized()
     {
-        // Initial Task
-        $task = $this->createTask();
-
         // Logged User
         $this->createUserAndLogin();
+
+        // Initial Task
+        $task = $this->createTask();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
@@ -309,11 +286,11 @@ class TaskControllerTest extends BaseWebTestCase
 
     public function testTaskPOSTEditAuthorized()
     {
-        // Initial Task
-        $task = $this->createTask();
-
         // Logged User
         $this->createUserAndLogin();
+
+        // Initial Task
+        $task = $this->createTask();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
@@ -351,12 +328,12 @@ class TaskControllerTest extends BaseWebTestCase
         string $selector,
         string $idValidationMessage
     ) {
+        // Logged User
+        $this->createUserAndLogin();
+
         // Initial Task
         $this->createTask();
         $updatedTask = TaskFactory::createOne();
-
-        // Logged User
-        $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $updatedTask->getId()));
@@ -376,13 +353,11 @@ class TaskControllerTest extends BaseWebTestCase
 
     public function testTaskGETUndoneToggleAuthorized()
     {
-        // Initial Undone Task
-        $initialTask = TaskFactory::createOne([
-            'isDone' => false
-        ]);
-
         // Logged User
-        $this->createUserAndLogin();
+        $user = $this->createUserAndLogin();
+
+        // Initial Undone Task
+        $initialTask = $this->createTask($user, false);
 
         // Request
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $initialTask->getId()));
@@ -409,13 +384,11 @@ class TaskControllerTest extends BaseWebTestCase
 
     public function testTaskGETDoneToggleAuthorized()
     {
-        // Initial Done Task
-        $initialTask = TaskFactory::createOne([
-            'isDone' => true
-        ]);
-
         // Logged User
-        $this->createUserAndLogin();
+        $user = $this->createUserAndLogin();
+
+        // Initial Done Task owned by user
+        $initialTask = $this->createTask($user, true);
 
         // Request
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $initialTask->getId()));
@@ -443,19 +416,19 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getNotFoundActions()
      */
-    public function testTask404Exception($uri)
+    public function testTask404Exception(string $method, string $uri)
     {
-        $this->notFound404Exception($uri);
+        $this->notFound404Exception($method, $uri);
     }
 
     public function testTaskGETDeleteAuthorized()
     {
+        // Logged User
+        $this->createUserAndLogin();
+
         // Initial Task
         $task = $this->createTask();
         $taskId = $task->getId();
-
-        // Logged User
-        $this->createUserAndLogin();
 
         // Request
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/delete', $task->getId()));
@@ -478,31 +451,45 @@ class TaskControllerTest extends BaseWebTestCase
 
     public function getUnauthorizedActions(): array
     {
+        // Method, Uri
         return [
-            ['/tasks'],
-            ['/tasks/create'],
-            ['/tasks/fake/edit'],
-            ['/tasks/fake/toggle'],
-            ['/tasks/fake/delete'],
+            [Request::METHOD_GET, '/tasks'],
+            [Request::METHOD_GET, '/tasks/create'],
+            [Request::METHOD_POST, '/tasks/create'],
+            [Request::METHOD_GET, '/tasks/fake/edit'],
+            [Request::METHOD_POST, '/tasks/fake/edit'],
+            [Request::METHOD_GET, '/tasks/fake/toggle'],
+            [Request::METHOD_GET, '/tasks/fake/delete'],
         ];
     }
 
     public function getNotFoundActions(): array
     {
+        // Method, Uri
         return [
-            ['/tasks/fake/edit'],
-            ['/tasks/fake/toggle'],
-            ['/tasks/fake/delete'],
+            [Request::METHOD_GET, '/tasks/fake/edit'],
+            [Request::METHOD_POST, '/tasks/fake/edit'],
+            [Request::METHOD_GET, '/tasks/fake/toggle'],
+            [Request::METHOD_GET, '/tasks/fake/delete'],
         ];
     }
 
-    private function createTask(): Task
+    private function createTask(?User $owner = null, bool $isDone = null): Task
     {
         return TaskFactory::createOne([
                        'title' => 'task_title',
                        'content' => 'task_content',
+                        'owner' => $owner,
+                        'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
                     ])
                     ->object();
+    }
+
+    private function createTasks(int $number, bool $isDone = null): array
+    {
+        return TaskFactory::createMany($number, [
+            'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
+        ]);
     }
 
     public function getValidationErrors(): array

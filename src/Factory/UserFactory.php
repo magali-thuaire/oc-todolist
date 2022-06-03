@@ -32,6 +32,13 @@ final class UserFactory extends ModelFactory
         parent::__construct();
     }
 
+    public function promoteRole(string $role): self
+    {
+        return $this->addState([
+            'roles' => [$role],
+        ]);
+    }
+
     protected function getDefaults(): array
     {
         return [

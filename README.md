@@ -149,3 +149,9 @@ ROLE USER
 login: user
 password: todolist
 ```
+
+```
+ROLE ADMIN
+login: admin
+password: todolist
+```
