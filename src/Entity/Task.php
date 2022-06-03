@@ -35,6 +35,7 @@ class Task
 
     public const DONE_ACTION = 'Marquer comme faite';
     public const UNDONE_ACTION = 'Marquer comme non terminée';
+    public const ANONYMOUS_TASK = 'anonyme';
 
     public function __construct()
     {

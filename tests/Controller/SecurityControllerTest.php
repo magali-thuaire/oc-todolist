@@ -115,7 +115,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->assertSelectorTextSame('div.alert.alert-danger', 'Identifiants invalides.');
     }
 
-    public function getUnauthorizedActions(): array
+    private function getUnauthorizedActions(): array
     {
         // Method, Uri
         return [
