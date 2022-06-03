@@ -11,12 +11,12 @@ class DefaultControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getUnauthorizedActions
      */
-    public function testUnauthorizedAction($uri)
+    public function testUnauthorizedAction(string $method, string $uri)
     {
-        $this->unauthorizedAction($uri);
+        $this->unauthorizedAction($method, $uri);
     }
 
-    public function testDefaulGETHomepageAuthorized()
+    public function testDefaultGETHomepageAuthorized()
     {
         // Logged User
         $this->createUserAndLogin();
@@ -56,8 +56,9 @@ class DefaultControllerTest extends BaseWebTestCase
 
     public function getUnauthorizedActions(): array
     {
+        // Method, Uri
         return [
-            ['/'],
+            [Request::METHOD_GET, '/'],
         ];
     }
 }

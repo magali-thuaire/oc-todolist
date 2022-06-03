@@ -11,7 +11,6 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -56,10 +55,10 @@ class BaseWebTestCase extends WebTestCase
         return $this->getTranslator()->trans($id, $params, 'validators');
     }
 
-    protected function unauthorizedAction($uri)
+    protected function unauthorizedAction(string $method, string $uri)
     {
         // Request
-        $this->client->request(Request::METHOD_GET, $uri);
+        $this->client->request($method, $uri);
 
         $loginUrl = $this->getRouter()->generate('login', [], 0);
 
@@ -68,22 +67,25 @@ class BaseWebTestCase extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
     }
 
-    public function notFound404Exception($uri)
+    protected function forbiddenAction(string $method, string $uri)
+    {
+        // Request
+        $this->client->request($method, $uri);
+
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    protected function notFound404Exception(string $method, string $uri)
     {
         // Logged User
         $this->createUserAndLogin();
 
         // Request
-        $this->client->request(Request::METHOD_GET, $uri);
+        $this->client->request($method, $uri);
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
-    }
-
-    private function purgeDatabase()
-    {
-        $purger = new ORMPurger($this->getEntityManager());
-        $purger->purge();
     }
 
     protected function createUser(): User
@@ -94,6 +96,22 @@ class BaseWebTestCase extends WebTestCase
                 'plainPassword' => 'todolist'
             ])
             ->object();
+    }
+
+    protected function createAdminUserAndLogin(): User
+    {
+        $user = UserFactory::new([
+                'username' => 'admin_username',
+                'email' => 'admin_username@todolist.fr',
+                'plainPassword' => 'todolist'
+            ])
+            ->promoteRole('ROLE_ADMIN')
+            ->create()
+            ->object();
+
+        $this->client->loginUser($user);
+
+        return $user;
     }
 
     protected function createUserAndLogin(): User
@@ -117,5 +135,11 @@ class BaseWebTestCase extends WebTestCase
         $form = $crawler->selectButton('Modifier')->form($fields);
 
         return $this->client->submit($form);
+    }
+
+    private function purgeDatabase()
+    {
+        $purger = new ORMPurger($this->getEntityManager());
+        $purger->purge();
     }
 }

@@ -10,8 +10,34 @@ use App\Tests\Utils\BaseWebTestCase;
 
 class UserControllerTest extends BaseWebTestCase
 {
+    /**
+     * @dataProvider getForbiddenActions
+     */
+    public function testForbiddenAction(string $method, string $uri)
+    {
+        $this->createUserAndLogin();
+
+        $this->forbiddenAction($method, $uri);
+    }
+
+    public function testForbiddenUserGETEdit()
+    {
+        $this->createUserAndLogin();
+
+        // User
+        $user = UserFactory::createOne();
+
+        // Request
+        $this->client->request(Request::METHOD_GET, sprintf('/users/%d/edit', $user->getId()));
+
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
     public function testUserGETList()
     {
+        $this->createAdminUserAndLogin();
+
         UserFactory::createMany(10);
 
         // Request
@@ -44,11 +70,13 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals('Actions', $actionColumn);
         // Table - Body
         $nbUsers = $crawler->filter('table > tbody')->children()->count();
-        $this->assertEquals(10, $nbUsers);
+        $this->assertEquals(11, $nbUsers);
     }
 
     public function testUserGETCreate()
     {
+        $this->createAdminUserAndLogin();
+
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/users/create');
 
@@ -81,8 +109,13 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Ajouter');
     }
 
-    public function testUserPOSTCreate()
+    /**
+     * @dataProvider getRoleUserOrRoleAdmin()
+     */
+    public function testUserPOSTCreate(string $role)
     {
+        $this->createAdminUserAndLogin();
+
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/users/create');
 
@@ -92,7 +125,7 @@ class UserControllerTest extends BaseWebTestCase
             'user[plainPassword][first]' => 'todolist',
             'user[plainPassword][second]' => 'todolist',
             'user[email]' => 'test@totdolist.fr',
-            'user[role]' => 'ROLE_ADMIN'
+            'user[role]' => $role
         ]);
 
         // Redirection
@@ -111,7 +144,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($createdUser, 'user created not found');
         $userPasswodHasher = $this->getPasswordHasher();
         $this->assertTrue($userPasswodHasher->isPasswordValid($createdUser, 'todolist'));
-        $this->assertContains('ROLE_ADMIN', $createdUser->getRoles());
+        $this->assertContains($role, $createdUser->getRoles());
     }
 
     /**
@@ -123,6 +156,8 @@ class UserControllerTest extends BaseWebTestCase
         string $selector,
         string $idValidationMessage
     ) {
+
+        $this->createAdminUserAndLogin();
 
         // New user
         $this->createUser();
@@ -151,6 +186,9 @@ class UserControllerTest extends BaseWebTestCase
         ?string $secondPasswordValue,
         string $idValidationMessage
     ) {
+
+        $this->createAdminUserAndLogin();
+
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/users/create');
 
@@ -170,6 +208,8 @@ class UserControllerTest extends BaseWebTestCase
 
     public function testUserGETEdit()
     {
+        $this->createAdminUserAndLogin();
+
         // User
         $user = $this->createUser();
 
@@ -206,8 +246,13 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Modifier');
     }
 
-    public function testUserPOSTEdit()
+    /**
+     * @dataProvider getRoleUserOrRoleAdmin()
+     */
+    public function testUserPOSTEdit(string $role)
     {
+        $this->createAdminUserAndLogin();
+
         // Initial User
         $user = $this->createUser();
 
@@ -220,7 +265,7 @@ class UserControllerTest extends BaseWebTestCase
             'user[plainPassword][first]' => 'user_password_updated',
             'user[plainPassword][second]' => 'user_password_updated',
             'user[email]' => 'user_email_updated@todolist.fr',
-            'user[role]' => 'ROLE_ADMIN'
+            'user[role]' => $role
         ]);
 
         // Redirection
@@ -239,7 +284,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($updatedUser, 'user updated not found');
         $userPasswodHasher = $this->getPasswordHasher();
         $this->assertTrue($userPasswodHasher->isPasswordValid($updatedUser, 'user_password_updated'));
-        $this->assertContains('ROLE_ADMIN', $updatedUser->getRoles());
+        $this->assertContains($role, $updatedUser->getRoles());
     }
 
     /**
@@ -251,6 +296,9 @@ class UserControllerTest extends BaseWebTestCase
         string $selector,
         string $idValidationMessage
     ) {
+
+        $this->createAdminUserAndLogin();
+
         // Initial User
         $this->createUser();
         $updatedUser = UserFactory::createOne();
@@ -279,6 +327,9 @@ class UserControllerTest extends BaseWebTestCase
         ?string $secondPasswordValue,
         string $idValidationMessage
     ) {
+
+        $this->createAdminUserAndLogin();
+
         // Initial User
         $user = $this->createUser();
 
@@ -302,15 +353,19 @@ class UserControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getNotFoundActions()
      */
-    public function testUser404Exception($uri)
+    public function testUser404Exception(string $method, string $uri)
     {
-        $this->notFound404Exception($uri);
+        $this->createAdminUserAndLogin();
+
+        $this->notFound404Exception($method, $uri);
     }
 
     public function getNotFoundActions(): array
     {
+        // Method, Uri
         return [
-            ['/users/fake/edit'],
+            [Request::METHOD_GET, '/users/fake/edit'],
+            [Request::METHOD_POST, '/users/fake/edit'],
         ];
     }
 
@@ -320,8 +375,6 @@ class UserControllerTest extends BaseWebTestCase
         $usernameSelector = 'input[type=text]#user_username';
         $emailField = 'user[email]';
         $emailSelector = 'input[type=email]#user_email';
-        $roleField = 'user[role]';
-        $roleSelector = 'select#user_role';
 
         // fieldName, fieldValue, selector, idValidationMessage
         return [
@@ -380,6 +433,24 @@ class UserControllerTest extends BaseWebTestCase
             ['password', 'password_not_same', 'user.password.fields'],
             // Password max length
             [str_repeat('a', 65), str_repeat('a', 65), 'user.password.max'],
+        ];
+    }
+
+    public function getForbiddenActions(): array
+    {
+        // Method, Uri
+        return [
+            [Request::METHOD_GET, '/users'],
+            [Request::METHOD_GET, '/users/create'],
+            [Request::METHOD_POST, '/users/create'],
+        ];
+    }
+
+    private function getRoleUserOrRoleAdmin(): array
+    {
+        return [
+            ['ROLE_ADMIN'],
+            ['ROLE_USER'],
         ];
     }
 }

@@ -12,9 +12,9 @@ class SecurityControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getUnauthorizedActions
      */
-    public function testUnauthorizedAction($uri)
+    public function testUnauthorizedAction(string $method, string $uri)
     {
-        $this->unauthorizedAction($uri);
+        $this->unauthorizedAction($method, $uri);
     }
 
     public function testSecurityGETLogin()
@@ -117,8 +117,9 @@ class SecurityControllerTest extends BaseWebTestCase
 
     public function getUnauthorizedActions(): array
     {
+        // Method, Uri
         return [
-            ['/logout'],
+            [Request::METHOD_GET, '/logout'],
         ];
     }
 }
