@@ -446,4 +446,11 @@ class UserControllerTest extends BaseWebTestCase
         ];
     }
 
+    private function getRoleUserOrRoleAdmin(): array
+    {
+        return [
+            ['ROLE_ADMIN'],
+            ['ROLE_USER'],
+        ];
+    }
 }
