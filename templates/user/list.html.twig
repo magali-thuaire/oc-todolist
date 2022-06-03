@@ -6,7 +6,7 @@
 
 {% block body %}
     {% if users|length == 0 %}
-        <div class="alert alert-warning" role="alert">
+        <div class="alert alert-warning no_user" role="alert">
             Il n'y a pas encore d'utilisateur enregistré. <a href="{{ path('user_create') }}" class="btn btn-warning pull-right">Créer un utilisateur</a>
         </div>
     {% else %}
@@ -17,6 +17,7 @@
                     <th>#</th>
                     <th>Nom d'utilisateur</th>
                     <th>Adresse d'utilisateur</th>
+                    <th>Rôle</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -26,6 +27,9 @@
                         <th scope="row">{{ loop.index }}</th>
                         <td>{{ user.username }}</td>
                         <td>{{ user.email }}</td>
+                        <td>
+                            {{ (user.isAdmin) ? constant('App\\Entity\\User::ROLES')['ROLE_ADMIN'] : constant('App\\Entity\\User::ROLES')['ROLE_USER'] }}
+                        </td>
                         <td>
                             <a href="{{ path('user_edit', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
                         </td>

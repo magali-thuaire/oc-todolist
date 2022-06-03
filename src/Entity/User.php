@@ -45,6 +45,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
+    public const ROLES = [
+        'ROLE_USER' => 'utilisateur',
+        'ROLE_ADMIN' => 'administrateur',
+    ];
+
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
@@ -130,6 +135,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = $roles;
 
         return $this;
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->roles);
     }
 
     /**

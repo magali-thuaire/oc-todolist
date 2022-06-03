@@ -12,6 +12,8 @@ class UserControllerTest extends BaseWebTestCase
 {
     public function testUserGETList()
     {
+        UserFactory::createMany(10);
+
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/users');
 
@@ -28,6 +30,21 @@ class UserControllerTest extends BaseWebTestCase
 
         // Main Title
         $this->assertSelectorTextSame('h1', 'Liste des utilisateurs');
+
+        // Table - Head
+        $idColumn = $crawler->filter('table > thead > tr > th:nth-child(1)')->text();
+        $this->assertEquals('#', $idColumn);
+        $usernameColumn = $crawler->filter('table > thead > tr > th:nth-child(2)')->text();
+        $this->assertEquals('Nom d\'utilisateur', $usernameColumn);
+        $emailColumn = $crawler->filter('table > thead > tr > th:nth-child(3)')->text();
+        $this->assertEquals('Adresse d\'utilisateur', $emailColumn);
+        $roleColumn = $crawler->filter('table > thead > tr > th:nth-child(4)')->text();
+        $this->assertEquals('Rôle', $roleColumn);
+        $actionColumn = $crawler->filter('table > thead > tr > th:nth-child(5)')->text();
+        $this->assertEquals('Actions', $actionColumn);
+        // Table - Body
+        $nbUsers = $crawler->filter('table > tbody')->children()->count();
+        $this->assertEquals(10, $nbUsers);
     }
 
     public function testUserGETCreate()
@@ -56,6 +73,9 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertSelectorExists('input[type=password]#user_plainPassword_first');
         $this->assertSelectorExists('input[type=password]#user_plainPassword_second');
         $this->assertSelectorExists('input[type=email]#user_email');
+        $this->assertSelectorExists('select#user_role');
+        $userRoleSelected = $crawler->filter('select#user_role')->filter('option[value=ROLE_USER]')->attr('selected');
+        $this->assertEquals('selected', $userRoleSelected);
 
         // Submit button
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Ajouter');
@@ -71,7 +91,8 @@ class UserControllerTest extends BaseWebTestCase
             'user[username]' => 'test',
             'user[plainPassword][first]' => 'todolist',
             'user[plainPassword][second]' => 'todolist',
-            'user[email]' => 'test@totdolist.fr'
+            'user[email]' => 'test@totdolist.fr',
+            'user[role]' => 'ROLE_ADMIN'
         ]);
 
         // Redirection
@@ -90,6 +111,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($createdUser, 'user created not found');
         $userPasswodHasher = $this->getPasswordHasher();
         $this->assertTrue($userPasswodHasher->isPasswordValid($createdUser, 'todolist'));
+        $this->assertContains('ROLE_ADMIN', $createdUser->getRoles());
     }
 
     /**
@@ -174,9 +196,11 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($form = $crawler->filter('form'));
         $this->assertEquals($updateUserUri, $form->attr('action'));
 
-        $this->assertSelectorExists('input[type=text]#user_username');
+        $this->assertInputValueSame('user[username]', $user->getUsername());
         $this->assertSelectorExists('input[type=password]#user_plainPassword_first');
         $this->assertSelectorExists('input[type=password]#user_plainPassword_second');
+        $userRoleSelected = $crawler->filter('select#user_role')->filter('option[value=ROLE_USER]')->attr('selected');
+        $this->assertEquals('selected', $userRoleSelected);
 
         // Submit button
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Modifier');
@@ -195,7 +219,8 @@ class UserControllerTest extends BaseWebTestCase
             'user[username]' => 'user_username_updated',
             'user[plainPassword][first]' => 'user_password_updated',
             'user[plainPassword][second]' => 'user_password_updated',
-            'user[email]' => 'user_email_updated@todolist.fr'
+            'user[email]' => 'user_email_updated@todolist.fr',
+            'user[role]' => 'ROLE_ADMIN'
         ]);
 
         // Redirection
@@ -214,6 +239,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($updatedUser, 'user updated not found');
         $userPasswodHasher = $this->getPasswordHasher();
         $this->assertTrue($userPasswodHasher->isPasswordValid($updatedUser, 'user_password_updated'));
+        $this->assertContains('ROLE_ADMIN', $updatedUser->getRoles());
     }
 
     /**
@@ -294,6 +320,8 @@ class UserControllerTest extends BaseWebTestCase
         $usernameSelector = 'input[type=text]#user_username';
         $emailField = 'user[email]';
         $emailSelector = 'input[type=email]#user_email';
+        $roleField = 'user[role]';
+        $roleSelector = 'select#user_role';
 
         // fieldName, fieldValue, selector, idValidationMessage
         return [
