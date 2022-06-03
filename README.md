@@ -124,6 +124,15 @@ You must define DATABASE_URL environment variable for tests. By default, tests u
 <env name="DATABASE_URL" value="mysql://root:root@127.0.0.1:8889/todolist_test?serverVersion=5.7" />
 ```
 
+**Configure Database**
+
+Next, build the database and execute the migrations with:
+
+```
+symfony console doctrine:database:create --env=test
+symfony console doctrine:migrations:migrate --env=test
+```
+
 **Run the tests**
 
 To run all tests, use the following command:
