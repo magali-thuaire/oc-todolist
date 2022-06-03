@@ -315,6 +315,7 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Initial Task
         $task = $this->createTask();
+        $initialOwner = $task->getOwner();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
@@ -341,6 +342,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($updatedTask, 'task updated not found');
         $this->assertEquals('task_title_updated', $updatedTask->getTitle());
         $this->assertEquals('task_content_updated', $updatedTask->getContent());
+        $this->assertEquals($initialOwner, $updatedTask->getOwner());
     }
 
     /**
@@ -446,9 +448,9 @@ class TaskControllerTest extends BaseWebTestCase
     }
 
     /**
-     * @dataProvider getRoleUserOrRoleAdmin()
+     * @dataProvider getRoleUserOrRoleAdminAndTask()
      */
-    public function testTaskGETDeleteAuthorized(string $role)
+    public function testTaskGETDeleteAuthorized(string $role, bool $anonymousTask)
     {
         if ($role === 'ROLE_ADMIN') {
             $this->createAdminUserAndLogin();
@@ -458,7 +460,7 @@ class TaskControllerTest extends BaseWebTestCase
         }
 
         // Initial Task owned by user not admin
-        $task = $this->createTask($user);
+        $task = $this->createTask($anonymousTask ? null : $user);
         $taskId = $task->getId();
 
         // Request
@@ -480,14 +482,21 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertNull($deletedTask);
     }
 
-    public function testTaskGETDeleteForbidden()
+    /**
+     * @dataProvider getTaskAnonymousOrNot()
+     */
+    public function testTaskGETDeleteForbidden(bool $anonymousTask)
     {
         // Logged User
         $this->createUserAndLogin();
 
-        // Initial Task owned by an other user
-        $owner = UserFactory::createOne()->object();
-        $task = $this->createTask($owner);
+        // Initial Task anonymous or owned by an other user
+        if ($anonymousTask) {
+            $task = $this->createTask();
+        } else {
+            $owner = UserFactory::createOne()->object();
+            $task = $this->createTask($owner);
+        }
 
         // Response
         $this->forbiddenAction(Request::METHOD_GET, sprintf('/tasks/%d/delete', $task->getId()));
@@ -552,7 +561,7 @@ class TaskControllerTest extends BaseWebTestCase
             'owner' => $owner,
             'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
         ])
-                          ->object();
+        ->object();
     }
 
     private function createTasks(int $number, bool $isDone = null): array
@@ -560,5 +569,24 @@ class TaskControllerTest extends BaseWebTestCase
         return TaskFactory::createMany($number, [
             'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
         ]);
+    }
+
+    private function getRoleUserOrRoleAdminAndTask(): array
+    {
+        // User Role, anonymous task
+        return [
+            ['ROLE_ADMIN', true],
+            ['ROLE_ADMIN', false],
+            ['ROLE_USER', false],
+        ];
+    }
+
+    private function getTaskAnonymousOrNot(): array
+    {
+        // Anonymous Task
+        return [
+            [true],
+            [false]
+        ];
     }
 }
