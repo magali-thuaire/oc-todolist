@@ -27,7 +27,10 @@ class TaskController extends BaseController
         $undoneTasks = $this->managerRegistry
             ->getRepository(Task::class)
              ->findBy(
-                 ['isDone' => false],
+                 [
+                     'owner' => $this->getUser(),
+                     'isDone' => false
+                 ],
                  ['id' => 'DESC' ]
              );
         return $this->render('task/list.html.twig', [
@@ -41,7 +44,10 @@ class TaskController extends BaseController
         $doneTasks = $this->managerRegistry
             ->getRepository(Task::class)
             ->findBy(
-                ['isDone' => true],
+                [
+                    'owner' => $this->getUser(),
+                    'isDone' => true
+                ],
                 ['id' => 'DESC']
             );
 
