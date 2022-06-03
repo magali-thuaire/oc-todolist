@@ -6,6 +6,7 @@ use App\Entity\Task;
 use App\Form\TaskType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -119,6 +120,7 @@ class TaskController extends BaseController
     }
 
     #[Route(path: '/tasks/{id}/delete', name: 'task_delete', methods: 'GET')]
+    #[IsGranted('DELETE', subject: 'task')]
     public function deleteTaskAction(Task $task): RedirectResponse
     {
         $this->em->remove($task);

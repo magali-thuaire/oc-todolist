@@ -54,7 +54,7 @@ class DefaultControllerTest extends BaseWebTestCase
         $this->assertEquals($listDoneTasksButton, $listDoneTasksUri);
     }
 
-    public function getUnauthorizedActions(): array
+    private function getUnauthorizedActions(): array
     {
         // Method, Uri
         return [

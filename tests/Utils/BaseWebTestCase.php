@@ -123,6 +123,14 @@ class BaseWebTestCase extends WebTestCase
         return $user;
     }
 
+    protected function getRoleUserOrRoleAdmin(): array
+    {
+        return [
+            ['ROLE_ADMIN'],
+            ['ROLE_USER'],
+        ];
+    }
+
     protected function submitCreateForm(Crawler $crawler, array $fields): Crawler
     {
         $form = $crawler->selectButton('Ajouter')->form($fields);

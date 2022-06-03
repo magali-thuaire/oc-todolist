@@ -360,7 +360,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->notFound404Exception($method, $uri);
     }
 
-    public function getNotFoundActions(): array
+    private function getNotFoundActions(): array
     {
         // Method, Uri
         return [
@@ -369,7 +369,7 @@ class UserControllerTest extends BaseWebTestCase
         ];
     }
 
-    public function getValidationErrors(): array
+    private function getValidationErrors(): array
     {
         $usernameField = 'user[username]';
         $usernameSelector = 'input[type=text]#user_username';
@@ -423,7 +423,7 @@ class UserControllerTest extends BaseWebTestCase
         ];
     }
 
-    public function getPasswordValidationErrors(): array
+    private function getPasswordValidationErrors(): array
     {
         // firstPasswordValue, secondPasswordValue, idValidationMessage
         return [
@@ -436,7 +436,7 @@ class UserControllerTest extends BaseWebTestCase
         ];
     }
 
-    public function getForbiddenActions(): array
+    private function getForbiddenActions(): array
     {
         // Method, Uri
         return [
@@ -446,11 +446,4 @@ class UserControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function getRoleUserOrRoleAdmin(): array
-    {
-        return [
-            ['ROLE_ADMIN'],
-            ['ROLE_USER'],
-        ];
-    }
 }
