@@ -96,11 +96,13 @@ class BaseWebTestCase extends WebTestCase
             ->object();
     }
 
-    protected function createUserAndLogin(): void
+    protected function createUserAndLogin(): User
     {
         $user = $this->createUser();
 
         $this->client->loginUser($user);
+
+        return $user;
     }
 
     protected function submitCreateForm(Crawler $crawler, array $fields): Crawler

@@ -6,14 +6,13 @@ use App\Entity\Task;
 use App\Form\TaskType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class TaskController extends AbstractController
+class TaskController extends BaseController
 {
     public function __construct(
         private readonly ManagerRegistry $managerRegistry,
@@ -28,7 +27,10 @@ class TaskController extends AbstractController
         $undoneTasks = $this->managerRegistry
             ->getRepository(Task::class)
              ->findBy(
-                 ['isDone' => false],
+                 [
+                     'owner' => $this->getUser(),
+                     'isDone' => false
+                 ],
                  ['id' => 'DESC' ]
              );
         return $this->render('task/list.html.twig', [
@@ -42,7 +44,10 @@ class TaskController extends AbstractController
         $doneTasks = $this->managerRegistry
             ->getRepository(Task::class)
             ->findBy(
-                ['isDone' => true],
+                [
+                    'owner' => $this->getUser(),
+                    'isDone' => true
+                ],
                 ['id' => 'DESC']
             );
 
@@ -58,6 +63,7 @@ class TaskController extends AbstractController
         $form = $this->createForm(TaskType::class, $task);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $task->setOwner($this->getUser());
             $this->em->persist($task);
             $this->em->flush();
 
