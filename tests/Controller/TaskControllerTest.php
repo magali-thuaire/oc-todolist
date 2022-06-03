@@ -208,7 +208,7 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskPOSTCreateAuthorized()
     {
         // Logged User
-        $this->createUserAndLogin();
+        $user = $this->createUserAndLogin();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/create');
@@ -232,6 +232,7 @@ class TaskControllerTest extends BaseWebTestCase
         // Created Task
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
         $createdTask = $taskRepository->findOneBy(['title' => 'task_title']);
+        $this->assertEquals($user->getId(), $createdTask->getOwner()->getId());
         $this->assertNotNull($createdTask, 'task created not found');
         $this->assertEquals('task_content', $createdTask->getContent());
     }
