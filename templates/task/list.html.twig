@@ -3,51 +3,56 @@
 {% block header_img %}<img class="slide-image" src="{{ asset('build/images/todolist_content.jpg') }}" alt="todo list">{% endblock %}
 
 {% block body %}
-    <div class="row">
+    <div>
         {% if tasks is not empty %}
-            <a href="{{ path('task_create') }}" class="btn btn-success">Créer une tâche</a>
+            <a href="{{ path('task_create') }}" class="btn btn-info">Créer une tâche</a>
         {% endif %}
     </div>
-    <div class="row">
-        {% for task in tasks %}
-            <div class="col-sm-4 col-lg-4 col-md-4">
+    {% for task in tasks %}
+        <div class="tasks col-md-6 col-lg-4">
             <div class="thumbnail">
                 <div class="caption">
-                    <h4 class="pull-right">
-                        {% if task.isDone %}<span class="glyphicon glyphicon-ok"></span>{% else %}<span class="glyphicon glyphicon-remove"></span>{% endif %}
-                    </h4>
-                    <h4><a href="{{ path('task_edit', {'id' : task.id }) }}">{{ task.title }}</a></h4>
-                    <p>{{ task.content }}</p>
-                </div>
-                <p class="text-muted">Crée le {{ task.createdAt|date('d/m/Y') }} par
-                    {% if task.owner is not null %}
-                         {{ task.owner.username }}
-                    {% else %}
-                        {{ constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
-                    {% endif %}
-                </p>
-                <div>
-                    <form action="{{ path('task_toggle', {'id' : task.id }) }}">
-                        <button class="btn btn-success btn-sm pull-right">
-                            {% if not task.isDone %}
-                                {{ constant('App\\Entity\\Task::DONE_ACTION') }}
-                            {% else %}
-                                {{ constant('App\\Entity\\Task::UNDONE_ACTION') }}
+                    <div class="caption--body">
+                        <h4 class="pull-right">
+                            {% if task.isDone %}<span class="glyphicon glyphicon-ok"></span>{% else %}<span class="glyphicon glyphicon-remove"></span>{% endif %}
+                        </h4>
+                        <h4>
+                            <a href="{{ path('task_edit', {'id' : task.id }) }}">{{ task.title }}</a></h4>
+                        <p>{{ task.content|u.truncate(100, '...') }}</p>
+                    </div>
+                    <div class="caption--footer">
+                        <div class="caption--footer--actions">
+                            <form action="{{ path('task_toggle', {'id' : task.id }) }}">
+                                {% if not task.isDone %}
+                                    <button class="btn btn-success btn-sm">
+                                        {{ constant('App\\Entity\\Task::DONE_ACTION') }}
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-warning btn-sm">
+                                        {{ constant('App\\Entity\\Task::UNDONE_ACTION') }}
+                                    </button>
+                                {% endif %}
+                            </form>
+                            {% if task.owner == app.user %}
+                                <form action="{{ path('task_delete', {'id' : task.id }) }}">
+                                    <button class="btn btn-danger btn-sm">Supprimer</button>
+                                </form>
                             {% endif %}
-                        </button>
-                    </form>
-                    {% if task.owner == app.user %}
-                        <form action="{{ path('task_delete', {'id' : task.id }) }}">
-                            <button class="btn btn-danger btn-sm pull-right">Supprimer</button>
-                        </form>
-                    {% endif %}
+                        </div>
+                        <p class="text-muted">Créée le {{ task.createdAt|date('d/m/Y') }} par
+                            {% if task.owner is not null %}
+                                {{ task.owner.username }}
+                            {% else %}
+                                {{ constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
+                            {% endif %}
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-        {% else %}
-            <div class="alert alert-warning no_task" role="alert">
-                Il n'y a pas encore de tâche enregistrée. <a href="{{ path('task_create') }}" class="btn btn-warning pull-right">Créer une tâche</a>
-            </div>
-        {% endfor %}
     </div>
+    {% else %}
+        <div class="alert alert-warning no_task" role="alert">
+            Il n'y a pas encore de tâche enregistrée. <a href="{{ path('task_create') }}" class="btn btn-warning pull-right">Créer une tâche</a>
+        </div>
+    {% endfor %}
 {% endblock %}

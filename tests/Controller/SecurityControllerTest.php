@@ -24,15 +24,6 @@ class SecurityControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-        // New User button
-        $this->assertSelectorExists('a.btn.btn-info');
-        $newUserButton = $crawler->filter('a.btn.btn-info');
-
-        $newUserUri = $this->getRouter()->generate('user_create');
-
-        $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-        $this->assertEquals('Créer un utilisateur', $newUserButton->text());
-
         // Image
         $this->assertNotEmpty($crawler->filter('img.slide-image'));
 
