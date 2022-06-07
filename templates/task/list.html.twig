@@ -47,13 +47,18 @@
                                     </form>
                                 {% endif %}
                             </div>
-                            <p class="text-muted">Créée le {{ task.createdAt|date('d/m/Y') }} par
-                                {% if task.owner is not null %}
-                                    {{ task.owner.username }}
-                                {% else %}
-                                    {{ constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
-                                {% endif %}
-                            </p>
+                            <div class="caption--footer--date">
+                                <p class="text-muted small">Créée le {{ task.createdAt|date('d/m/Y') }} par
+                                    {% if task.owner is not null %}
+                                        {{ task.owner.username }}
+                                    {% else %}
+                                        {{ constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
+                                    {% endif %}
+                                </p>
+                                <p class="text-muted small">
+                                    Dernière mise à jour le {{ task.updatedAt|date('d/m/Y H:m:s') }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

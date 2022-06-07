@@ -36,6 +36,7 @@ final class TaskFactory extends ModelFactory
     {
         return [
             'createdAt' => self::faker()->dateTimeBetween('-30 days', '-15 days'),
+            'updatedAt' => self::faker()->dateTimeBetween('-7 days', '-1 days'),
             'title' => self::faker()->text(20),
             'content' => self::faker()->paragraph(3),
             'isDone' => self::faker()->boolean(),

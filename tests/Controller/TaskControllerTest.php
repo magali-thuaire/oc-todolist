@@ -352,6 +352,7 @@ class TaskControllerTest extends BaseWebTestCase
         // Initial Undone Task
         $task = $this->createUndoneTask();
         $initialOwner = $task->getOwner();
+        $initialUpdatedAt = $task->getUpdatedAt();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
@@ -379,6 +380,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('task_title_updated', $updatedTask->getTitle());
         $this->assertEquals('task_content_updated', $updatedTask->getContent());
         $this->assertEquals($initialOwner->getId(), $updatedTask->getOwner()->getId());
+        $this->assertNotEquals($initialUpdatedAt, $updatedTask->getUpdatedAt());
     }
 
     /**
