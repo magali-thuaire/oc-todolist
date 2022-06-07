@@ -6,6 +6,7 @@ use App\Entity\Task;
 use App\Entity\User;
 use App\Factory\TaskFactory;
 use App\Factory\UserFactory;
+use DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Tests\Utils\BaseWebTestCase;
@@ -31,7 +32,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->createTasks(5, true);
 
         // First Task undone owned by user
-        $firstTaskFixture = $this->createTask($user, false);
+        $firstTaskFixture = $this->createTask($user, false, true);
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks');
@@ -39,24 +40,8 @@ class TaskControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-//        // New User button
-//        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
-//
-//        $newUserUri = $this->getRouter()->generate('user_create');
-//
-//        $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-//        $this->assertEquals('Créer un utilisateur', $newUserButton->text());
-//
-//        // Logout button
-//        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-danger'));
-//
-//        $newUserUri = $this->getRouter()->generate('logout');
-//
-//        $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-//        $this->assertEquals('Se déconnecter', $newUserButton->text());
-
         // New Task button
-        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-success'));
+        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
         $newUserUri = $this->getRouter()->generate('task_create');
 
@@ -96,13 +81,13 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETDoneListAuthorized()
     {
         // Logged User
-        $this->createUserAndLogin();
+        $user = $this->createUserAndLogin();
 
-        // Undone Tasks owned by user
-        $doneTasksFixture = $this->createTasks(5, true);
-        $firstTaskFixture = end($doneTasksFixture);
+        // Done Tasks
+        $this->createTasks(5, true);
+        $firstTaskFixture = $this->createTask($user, true, true);
 
-        // Done Tasks owned by user
+        // Undone Tasks
         $this->createTasks(5, false);
 
         // Request
@@ -112,7 +97,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         // New Task button
-        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-success'));
+        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
         $newUserUri = $this->getRouter()->generate('task_create');
 
@@ -120,7 +105,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('Créer une tâche', $newUserButton->text());
 
         // Tasks
-        $this->assertCount(5, $crawler->filter('div.thumbnail'));
+        $this->assertCount(6, $crawler->filter('div.thumbnail'));
 
         // First Task
         $firstTask = $crawler->filter('div.thumbnail')->first();
@@ -143,7 +128,7 @@ class TaskControllerTest extends BaseWebTestCase
         // First Task - Toggle
         $toggleTaskForm = $firstTask->filter('form')->first();
         $toggleTaskUri = $this->getRouter()->generate('task_toggle', ['id' => $firstTaskFixture->getId()]);
-        $toggleBtn = $firstTask->filter('button.btn.btn-success');
+        $toggleBtn = $firstTask->filter('button.btn.btn-warning');
 
         $this->assertEquals($toggleTaskUri, $toggleTaskForm->attr('action'));
         $this->assertEquals('Marquer comme non terminée', $toggleBtn->text());
@@ -160,25 +145,8 @@ class TaskControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-//        // New User button
-//        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
-//
-//        $newUserUri = $this->urlGenerator->generate('user_create');
-//
-//        $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-//        $this->assertEquals('Créer un utilisateur', $newUserButton->text());
-//
-//        // logout button
-//        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-danger'));
-//
-//        $newUserUri = $this->urlGenerator->generate('logout');
-//
-//        $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-//        $this->assertEquals('Se déconnecter', $newUserButton->text());
-
-//        // Main Title
-//        $this->assertNotEmpty($h1 = $crawler->filter('h1'));
-//        $this->assertEquals('Créer une tâche', $h1->text());
+        // Main Title
+        $this->assertSelectorTextSame('h1', 'Créer une nouvelle tâche');
 
         // Form
         $newTaskUri = $this->getRouter()->generate('task_create');
@@ -188,12 +156,11 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertSelectorExists('input[type=text]#task_title');
         $this->assertSelectorExists('textarea#task_content');
 
+        // Return button
+        $this->assertSelectorTextSame('a.btn.btn-primary', 'Retour à la liste des tâches à faire');
+
         // Submit button
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Ajouter');
-
-        // Return button
-        $this->assertNotEmpty($returnBtn = $crawler->filter('a.btn.btn-primary')->last());
-        $this->assertEquals('Retour à la liste des tâches', $returnBtn->text());
     }
 
     public function testTaskPOSTCreateAuthorized()
@@ -271,6 +238,9 @@ class TaskControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
+        // Main Title
+        $this->assertSelectorTextSame('h1', sprintf('Modifier %s', $task->getTitle()));
+
         // Form
         $updateTaskUri = $this->getRouter()->generate('task_edit', ['id' => $task->getId()]);
 
@@ -283,6 +253,9 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertSame('task_content', $content->text());
 
         $this->assertSelectorNotExists('select#task_owner');
+
+        // Return button
+        $this->assertSelectorTextSame('a.btn.btn-primary', 'Retour à la liste des tâches à faire');
 
         // Submit button
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Modifier');
@@ -553,20 +526,21 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function createTask(?User $owner = null, bool $isDone = null): Task
+    private function createTask(?User $owner = null, bool $isDone = null, bool $isCreatedNow = false): Task
     {
         return TaskFactory::createOne([
             'title' => 'task_title',
             'content' => 'task_content',
             'owner' => $owner,
-            'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
+            'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1),
+            'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
         ])
         ->object();
     }
 
-    private function createTasks(int $number, bool $isDone = null): array
+    private function createTasks(int $number, bool $isDone = null): void
     {
-        return TaskFactory::createMany($number, [
+        TaskFactory::createMany($number, [
             'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
         ]);
     }

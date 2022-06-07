@@ -9,7 +9,7 @@
         <meta name="author" content="">
         <link rel="icon" href="{{ asset('build/images/favicon.ico') }}" />
 
-        <title>{% block title %}To Do List app{% endblock %}</title>
+        <title>ToDoList | {% block title %}{% endblock %}</title>
 
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
@@ -21,31 +21,37 @@
 
     </head>
 
-    <body>
-        <nav class="navbar navbar-light navbar-fixed-top" style="background-color: #e3f2fd;" role="navigation">
+    <header>
+        <nav class="navbar navbar-light navbar-fixed-top" role="navigation">
             <div class="container">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="#">To Do List app</a>
-
-                    <img src="{{ asset('build/images/Logo_OpenClassrooms.png') }}" alt="OpenClassrooms" />
-                </div>
+                <a class="navbar-brand" href="{{ path('homepage') }}">
+                    <img class="navbar-logo" src="{{ asset('build/images/Logo_OpenClassrooms.png') }}" alt="OpenClassrooms" />
+                    <p>ToDoList</p>
+                </a>
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                    <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                            <li><a href="{{ path('homepage')}}">Accueil</a></li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tâches <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ path('task_list') }}">Tâches à faire</a></li>
+                                    <li><a href="{{ path('task_list_done') }}">Tâches terminées</a></li>
+                                </ul>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <li><a href="{{ path('user_list') }}">Utilisateurs</a></li>
+                            {% endif %}
+                            <li><a class="btn btn-danger logout" href="{{ path('logout') }}">Se déconnecter</a></li>
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </nav>
+    </header>
 
+    <body>
         <!-- Page Content -->
         <div class="container">
-            <div class="row">
-                <a href="{{ path('user_create') }}" class="btn btn-info">Créer un utilisateur</a>
-
-                {% if app.user %}
-                <a href="{{ path('logout') }}" class="pull-right btn btn-danger">Se déconnecter</a>
-                {% endif %}
-
-                {% if not app.user and 'login' != app.request.attributes.get('_route') %}
-                <a href="{{ path('login') }}" class="btn btn-success">Se connecter</a>
-                {% endif %}
-            </div>
-
             <div class="row">
                 <div class="col-md-12">
                     {% for flash_message in app.session.flashBag.get('success') %}
@@ -59,13 +65,21 @@
                             <strong>Oops !</strong> {{ flash_message }}
                         </div>
                     {% endfor %}
+                </div>
+            </div>
 
+            <div class="row">
+                <div class="col-md-12">
+                    {% block actions %}{% endblock %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
                     {% block header_title %}{% endblock %}
                     {% block header_img %}<img class="slide-image" src="{{ asset('build/images/todolist_homepage.jpg') }}" alt="todo list">{% endblock %}
                 </div>
             </div>
-
-            <br />
 
             <div class="row">
                 <div class="col-md-12">

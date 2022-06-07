@@ -1,0 +1,6 @@
+{{ form_start(form, {'action' : action }) }}
+    {{ form_widget(form) }}
+    <a href="{{ path('task_list') }}" class="btn btn-primary">Retour à la liste des tâches à faire</a>
+    <button type="submit" class="btn btn-success pull-right">{{ btn_text }}</button>
+{{ form_end(form) }}
+

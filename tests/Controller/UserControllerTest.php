@@ -83,18 +83,12 @@ class UserControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-        // New User button
-        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
-
-        $newUserUri = $this->getRouter()->generate('user_create');
-
-        $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-        $this->assertEquals('Créer un utilisateur', $newUserButton->text());
-
         // Main Title
         $this->assertSelectorTextSame('h1', 'Créer un utilisateur');
 
         // Form
+        $newUserUri = $this->getRouter()->generate('user_create');
+
         $this->assertNotEmpty($form = $crawler->filter('form'));
         $this->assertEquals($newUserUri, $form->attr('action'));
         $this->assertSelectorExists('input[type=text]#user_username');
@@ -104,6 +98,9 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertSelectorExists('select#user_role');
         $userRoleSelected = $crawler->filter('select#user_role')->filter('option[value=ROLE_USER]')->attr('selected');
         $this->assertEquals('selected', $userRoleSelected);
+
+        // Return button
+        $this->assertSelectorTextSame('a.btn.btn-primary', 'Retour à la liste des utilisateurs');
 
         // Submit button
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Ajouter');
@@ -219,14 +216,6 @@ class UserControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-//        // New User button
-//        $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-primary'));
-//
-//        $newUserUri = $this->getRouter()->generate('user_create');
-//
-//        $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-//        $this->assertEquals('Créer un utilisateur', $newUserButton->text());
-
         // Main Title
         $this->assertSelectorTextSame('h1', sprintf('Modifier %s', $user->getUsername()));
 
@@ -241,6 +230,9 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertSelectorExists('input[type=password]#user_plainPassword_second');
         $userRoleSelected = $crawler->filter('select#user_role')->filter('option[value=ROLE_USER]')->attr('selected');
         $this->assertEquals('selected', $userRoleSelected);
+
+        // Return button
+        $this->assertSelectorTextSame('a.btn.btn-primary', 'Retour à la liste des utilisateurs');
 
         // Submit button
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Modifier');

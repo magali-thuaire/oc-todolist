@@ -4,11 +4,8 @@
 {% block header_img %}{% endblock %}
 
 {% block body %}
-    <div class="row">
-        {{ form_start(form, {'action' : path('user_edit', {'id' : user.id})}) }}
-        {{ form_widget(form) }}
-
-        <button type="submit" class="btn btn-success pull-right">Modifier</button>
-        {{ form_end(form) }}
-    </div>
+    {{ include('user/_form.html.twig', {
+        action: path('user_edit', {'id' : user.id}),
+        btn_text: 'Modifier'
+    }) }}
 {% endblock %}

@@ -29,7 +29,7 @@ class TaskController extends BaseController
             ->getRepository(Task::class)
              ->findBy(
                  ['isDone' => false],
-                 ['id' => 'DESC' ]
+                 ['createdAt' => 'DESC' ]
              );
         return $this->render('task/list.html.twig', [
             'tasks' => $undoneTasks,
@@ -43,7 +43,7 @@ class TaskController extends BaseController
             ->getRepository(Task::class)
             ->findBy(
                 ['isDone' => true],
-                ['id' => 'DESC']
+                ['createdAt' => 'DESC' ]
             );
 
         return $this->render('task/list.html.twig', [
