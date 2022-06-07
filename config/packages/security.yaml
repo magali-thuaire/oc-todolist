@@ -22,7 +22,6 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            lazy: true
             pattern: ^/
             form_login:
                 login_path: login
@@ -31,6 +30,12 @@ security:
                 default_target_path:  /
                 enable_csrf: true
             logout: ~
+            remember_me:
+                secret: '%kernel.secret%'
+                always_remember_me: true
+                signature_properties:
+                    - password
+            login_throttling: true
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
