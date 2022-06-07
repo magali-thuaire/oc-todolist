@@ -1,6 +1,7 @@
 nav {
     background-color: var(--color-theme) !important;
     padding: 1rem;
+
     .navbar-brand {
         display: flex;
         justify-content: center;
@@ -22,16 +23,16 @@ nav {
             margin-top: 10px;
 
             a {
-                padding: 5px 15px ;
+                padding: 5px 15px;
+
                 &:hover {
                     background-color: transparent;
-
                 }
+
                 &.logout:hover {
                     background-color: var(--btn-logout-hover);
                 }
             }
         }
-
     }
 }

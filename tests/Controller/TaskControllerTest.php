@@ -40,6 +40,10 @@ class TaskControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString('Liste des tâches', $title->text());
+
         // New Task button
         $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
@@ -96,6 +100,10 @@ class TaskControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString('Liste des tâches', $title->text());
+
         // New Task button
         $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
@@ -144,6 +152,10 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString('Nouvelle tâche', $title->text());
 
         // Main Title
         $this->assertSelectorTextSame('h1', 'Créer une nouvelle tâche');
@@ -237,6 +249,10 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString(sprintf('Modification de %s', $task->getTitle()), $title->text());
 
         // Main Title
         $this->assertSelectorTextSame('h1', sprintf('Modifier %s', $task->getTitle()));

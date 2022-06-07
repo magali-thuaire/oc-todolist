@@ -27,6 +27,10 @@ class DefaultControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString('Accueil', $title->text());
+
         // Header navigation
         $navbarNav = $crawler->filter('.navbar-nav');
 

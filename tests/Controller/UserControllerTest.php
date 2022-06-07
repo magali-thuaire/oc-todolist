@@ -46,6 +46,10 @@ class UserControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString('Liste des utilisateurs', $title->text());
+
         // New User button
         $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
@@ -82,6 +86,10 @@ class UserControllerTest extends BaseWebTestCase
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString('Nouvel utilisateur', $title->text());
 
         // Main Title
         $this->assertSelectorTextSame('h1', 'Créer un utilisateur');
@@ -215,6 +223,10 @@ class UserControllerTest extends BaseWebTestCase
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString(sprintf('Modification de %s', $user->getUsername()), $title->text());
 
         // Main Title
         $this->assertSelectorTextSame('h1', sprintf('Modifier %s', $user->getUsername()));
