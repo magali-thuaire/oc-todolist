@@ -29,7 +29,8 @@ security:
                 always_use_default_target_path:  true
                 default_target_path:  /
                 enable_csrf: true
-            logout: ~
+            logout:
+                target: login
             remember_me:
                 secret: '%kernel.secret%'
                 always_remember_me: true
