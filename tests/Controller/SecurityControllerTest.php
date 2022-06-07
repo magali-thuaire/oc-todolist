@@ -24,6 +24,10 @@ class SecurityControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
+        // Title
+        $title = $crawler->filter('title');
+        $this->assertStringContainsString('Connexion', $title->text());
+
         // Image
         $this->assertNotEmpty($crawler->filter('img.slide-image'));
 
