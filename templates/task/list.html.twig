@@ -10,51 +10,58 @@
             <a href="{{ path('task_create') }}" class="btn btn-info">Créer une tâche</a>
         {% endif %}
     </div>
-    {% for task in tasks %}
-        <div class="tasks col-md-6 col-lg-4">
-            <div class="thumbnail">
-                <div class="caption">
-                    <div class="caption--body">
-                        <h4 class="pull-right">
-                            {% if task.isDone %}<span class="glyphicon glyphicon-ok"></span>{% else %}<span class="glyphicon glyphicon-remove"></span>{% endif %}
-                        </h4>
-                        <h4>
-                            <a href="{{ path('task_edit', {'id' : task.id }) }}">{{ task.title }}</a></h4>
-                        <p>{{ task.content|u.truncate(100, '...') }}</p>
-                    </div>
-                    <div class="caption--footer">
-                        <div class="caption--footer--actions">
-                            <form action="{{ path('task_toggle', {'id' : task.id }) }}">
-                                {% if not task.isDone %}
-                                    <button class="btn btn-success btn-sm">
-                                        {{ constant('App\\Entity\\Task::DONE_ACTION') }}
-                                    </button>
+    <div class="tasks">
+        {% for task in tasks %}
+            <div class="task col-md-6 col-lg-4">
+                <div class="thumbnail">
+                    <div class="caption">
+                        <div class="caption--body">
+                            <h4 class="pull-right">
+                                {% if task.isDone %}<span class="glyphicon glyphicon-ok"></span>{% else %}<span class="glyphicon glyphicon-remove"></span>{% endif %}
+                            </h4>
+                            <h4>
+                                {% if (not task.done or is_granted('ROLE_TASK_MANAGE')) %}
+                                    <a href="{{ path('task_edit', {'id' : task.id }) }}">{{ task.title }}</a>
                                 {% else %}
-                                    <button class="btn btn-warning btn-sm">
-                                        {{ constant('App\\Entity\\Task::UNDONE_ACTION') }}
-                                    </button>
+                                    {{ task.title }}
                                 {% endif %}
-                            </form>
-                            {% if task.owner == app.user %}
-                                <form action="{{ path('task_delete', {'id' : task.id }) }}">
-                                    <button class="btn btn-danger btn-sm">Supprimer</button>
-                                </form>
-                            {% endif %}
+                            </h4>
+                            <p>{{ task.content|u.truncate(100, '...') }}</p>
                         </div>
-                        <p class="text-muted">Créée le {{ task.createdAt|date('d/m/Y') }} par
-                            {% if task.owner is not null %}
-                                {{ task.owner.username }}
-                            {% else %}
-                                {{ constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
-                            {% endif %}
-                        </p>
+                        <div class="caption--footer">
+                            <div class="caption--footer--actions">
+                                <form action="{{ path('task_toggle', {'id' : task.id }) }}">
+                                    {% if not task.isDone %}
+                                        <button class="btn btn-success btn-sm">
+                                            {{ constant('App\\Entity\\Task::DONE_ACTION') }}
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-warning btn-sm">
+                                            {{ constant('App\\Entity\\Task::UNDONE_ACTION') }}
+                                        </button>
+                                    {% endif %}
+                                </form>
+                                {% if task.owner == app.user %}
+                                    <form action="{{ path('task_delete', {'id' : task.id }) }}">
+                                        <button class="btn btn-danger btn-sm">Supprimer</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                            <p class="text-muted">Créée le {{ task.createdAt|date('d/m/Y') }} par
+                                {% if task.owner is not null %}
+                                    {{ task.owner.username }}
+                                {% else %}
+                                    {{ constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
+                                {% endif %}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
+        {% else %}
+            <div class="alert alert-warning no_task" role="alert">
+                Il n'y a pas encore de tâche enregistrée. <a href="{{ path('task_create') }}" class="btn btn-warning pull-right">Créer une tâche</a>
+            </div>
+        {% endfor %}
     </div>
-    {% else %}
-        <div class="alert alert-warning no_task" role="alert">
-            Il n'y a pas encore de tâche enregistrée. <a href="{{ path('task_create') }}" class="btn btn-warning pull-right">Créer une tâche</a>
-        </div>
-    {% endfor %}
 {% endblock %}

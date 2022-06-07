@@ -21,18 +21,18 @@ class TaskControllerTest extends BaseWebTestCase
         $this->unauthorizedAction($method, $uri);
     }
 
-    public function testTaskGETListAuthorized()
+    public function testTaskUndoneGETListAuthorized()
     {
         // Logged User
-        $user = $this->createUserAndLogin();
+        $this->createUserAndLogin();
 
         // Undone Tasks
         $this->createTasks(5, false);
         // Done Tasks
         $this->createTasks(5, true);
 
-        // First Task undone owned by user
-        $firstTaskFixture = $this->createTask($user, false, true);
+        // First Undone Task
+        $firstTaskFixture = $this->createUndoneTask();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks');
@@ -56,7 +56,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertCount(6, $crawler->filter('div.thumbnail'));
 
         // First Task
-        $firstTask = $crawler->filter('div.thumbnail')->first();
+        $firstTask = $crawler->filter('.tasks > .task:first-child');
 
         // First Task - Edit
         $editTaskLink = $firstTask->filter('h4 > a');
@@ -66,7 +66,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals($firstTaskFixture->getTitle(), $editTaskLink->text());
 
         // First Task - Delete
-        $deleteTaskForm = $firstTask->filter('form')->last();
+        $deleteTaskForm = $firstTask->filter('form:last-child');
         $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
         $deleteBtn = $firstTask->filter('button.btn.btn-danger');
 
@@ -74,7 +74,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('Supprimer', $deleteBtn->text());
 
         // First Task - Toggle
-        $toggleTaskForm = $firstTask->filter('form')->first();
+        $toggleTaskForm = $firstTask->filter('form:first-child');
         $toggleTaskUri = $this->getRouter()->generate('task_toggle', ['id' => $firstTaskFixture->getId()]);
         $toggleBtn = $firstTask->filter('button.btn.btn-success');
 
@@ -82,14 +82,14 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('Marquer comme faite', $toggleBtn->text());
     }
 
-    public function testTaskGETDoneListAuthorized()
+    public function testTaskDoneGETListAuthorized()
     {
         // Logged User
-        $user = $this->createUserAndLogin();
+        $this->createUserAndLogin();
 
         // Done Tasks
         $this->createTasks(5, true);
-        $firstTaskFixture = $this->createTask($user, true, true);
+        $firstTaskFixture = $this->createDoneTask(true);
 
         // Undone Tasks
         $this->createTasks(5, false);
@@ -116,17 +116,13 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertCount(6, $crawler->filter('div.thumbnail'));
 
         // First Task
-        $firstTask = $crawler->filter('div.thumbnail')->first();
+        $firstTask = $crawler->filter('.tasks > .task:first-child');
 
         // First Task - Edit
-        $editTaskLink = $firstTask->filter('h4 > a');
-        $editTaskUri = $this->getRouter()->generate('task_edit', ['id' => $firstTaskFixture->getId()]);
-
-        $this->assertEquals($editTaskUri, $editTaskLink->attr('href'));
-        $this->assertEquals($firstTaskFixture->getTitle(), $editTaskLink->text());
+        $this->assertSelectorNotExists('h4 > a');
 
         // First Task - Delete
-        $deleteTaskForm = $firstTask->filter('form')->last();
+        $deleteTaskForm = $firstTask->filter('form:last-child');
         $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
         $deleteBtn = $firstTask->filter('button.btn.btn-danger');
 
@@ -134,12 +130,37 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('Supprimer', $deleteBtn->text());
 
         // First Task - Toggle
-        $toggleTaskForm = $firstTask->filter('form')->first();
+        $toggleTaskForm = $firstTask->filter('form:first-child');
         $toggleTaskUri = $this->getRouter()->generate('task_toggle', ['id' => $firstTaskFixture->getId()]);
         $toggleBtn = $firstTask->filter('button.btn.btn-warning');
 
         $this->assertEquals($toggleTaskUri, $toggleTaskForm->attr('action'));
         $this->assertEquals('Marquer comme non terminée', $toggleBtn->text());
+    }
+
+    public function testTaskDoneGETListAdmin()
+    {
+        // Logged User
+        $this->createAdminUserAndLogin();
+
+        // Done Tasks
+        $firstTaskFixture = $this->createDoneTask();
+
+        // Request
+        $crawler = $this->client->request(Request::METHOD_GET, '/tasks/done');
+
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        // First Task
+        $firstTask = $crawler->filter('.tasks > .task:first-child');
+
+        // First Task - Edit
+        $editTaskLink = $firstTask->filter('h4 > a');
+        $editTaskUri = $this->getRouter()->generate('task_edit', ['id' => $firstTaskFixture->getId()]);
+
+        $this->assertEquals($editTaskUri, $editTaskLink->attr('href'));
+        $this->assertEquals($firstTaskFixture->getTitle(), $editTaskLink->text());
     }
 
     public function testTaskGETCreateAuthorized()
@@ -236,13 +257,17 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
     }
 
-    public function testTaskGETEditAuthorized()
+    /**
+     * @dataProvider getOwner()
+     */
+    public function testTaskUndoneGETEditAuthorized(bool $anonymousTask)
     {
         // Logged User
         $this->createUserAndLogin();
 
-        // Initial Task
-        $task = $this->createTask();
+        // Initial Undone Task
+        $owner = $anonymousTask ? null : UserFactory::createOne()->object();
+        $task = $this->createTask($owner, false);
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
@@ -256,6 +281,10 @@ class TaskControllerTest extends BaseWebTestCase
 
         // Main Title
         $this->assertSelectorTextSame('h1', sprintf('Modifier %s', $task->getTitle()));
+
+        // Owner
+        $ownerUsername = $owner ? $owner->getUsername() : Task::ANONYMOUS_TASK;
+        $this->assertSelectorTextContains('p.text-muted.pull-right', $ownerUsername);
 
         // Form
         $updateTaskUri = $this->getRouter()->generate('task_edit', ['id' => $task->getId()]);
@@ -277,24 +306,42 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Modifier');
     }
 
-    public function testTaskAnonymousGETEditAuthorized()
+    /**
+     * @dataProvider getOwner()
+     */
+    public function testTaskDoneGETEditAuthorized(bool $anonymousTask)
     {
         // Logged User
         $this->createUserAndLogin();
 
-        // Initial Task
-        $task = TaskFactory::createOne([
-            'owner' => null
-        ]);
+        // Initial Undone Task
+        $owner = $anonymousTask ? null : UserFactory::createOne()->object();
+        $task = $this->createTask($owner, true);
+
+        // Request
+        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
+
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @dataProvider getOwner()
+     */
+    public function testTaskUndoneGETEditAdmin(bool $anonymousTask)
+    {
+        // Logged User
+        $this->createAdminUserAndLogin();
+
+        // Initial Done Task
+        $owner = $anonymousTask ? null : UserFactory::createOne()->object();
+        $task = $this->createTask($owner, true);
 
         // Request
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $task->getId()));
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-
-        // Form
-        $this->assertSelectorTextContains('p.text-muted.pull-right', Task::ANONYMOUS_TASK);
     }
 
     public function testTaskPOSTEditAuthorized()
@@ -302,8 +349,8 @@ class TaskControllerTest extends BaseWebTestCase
         // Logged User
         $this->createUserAndLogin();
 
-        // Initial Task
-        $task = $this->createTask();
+        // Initial Undone Task
+        $task = $this->createUndoneTask();
         $initialOwner = $task->getOwner();
 
         // Request
@@ -331,7 +378,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($updatedTask, 'task updated not found');
         $this->assertEquals('task_title_updated', $updatedTask->getTitle());
         $this->assertEquals('task_content_updated', $updatedTask->getContent());
-        $this->assertEquals($initialOwner, $updatedTask->getOwner());
+        $this->assertEquals($initialOwner->getId(), $updatedTask->getOwner()->getId());
     }
 
     /**
@@ -346,9 +393,9 @@ class TaskControllerTest extends BaseWebTestCase
         // Logged User
         $this->createUserAndLogin();
 
-        // Initial Task
+        // Initial Undone Task
         $this->createTask();
-        $updatedTask = TaskFactory::createOne();
+        $updatedTask = $this->createUndoneTask();
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/edit', $updatedTask->getId()));
@@ -369,10 +416,10 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETUndoneToggleAuthorized()
     {
         // Logged User
-        $user = $this->createUserAndLogin();
+        $this->createUserAndLogin();
 
         // Initial Undone Task
-        $initialTask = $this->createTask($user, false);
+        $initialTask = $this->createUndoneTask();
 
         // Request
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $initialTask->getId()));
@@ -400,10 +447,10 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskGETDoneToggleAuthorized()
     {
         // Logged User
-        $user = $this->createUserAndLogin();
+        $this->createUserAndLogin();
 
         // Initial Done Task owned by user
-        $initialTask = $this->createTask($user, true);
+        $initialTask = $this->createDoneTask();
 
         // Request
         $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/toggle', $initialTask->getId()));
@@ -542,25 +589,6 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function createTask(?User $owner = null, bool $isDone = null, bool $isCreatedNow = false): Task
-    {
-        return TaskFactory::createOne([
-            'title' => 'task_title',
-            'content' => 'task_content',
-            'owner' => $owner,
-            'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1),
-            'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
-        ])
-        ->object();
-    }
-
-    private function createTasks(int $number, bool $isDone = null): void
-    {
-        TaskFactory::createMany($number, [
-            'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
-        ]);
-    }
-
     private function getRoleUserOrRoleAdminAndTask(): array
     {
         // User Role, anonymous task
@@ -578,5 +606,50 @@ class TaskControllerTest extends BaseWebTestCase
             [true],
             [false]
         ];
+    }
+
+    private function getOwner(): array
+    {
+        // Anonymous User
+        return [
+            [true],
+            [false]
+        ];
+    }
+
+    private function createTask(?User $owner = null, bool $isDone = null): Task
+    {
+        return TaskFactory::createOne([
+                'title' => 'task_title',
+                'content' => 'task_content',
+                'owner' => $owner,
+                'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1),
+            ])
+            ->object();
+    }
+
+    private function createUndoneTask(bool $isCreatedNow = false): Task
+    {
+        return TaskFactory::createOne([
+                'isDone' => false,
+                'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
+            ])
+            ->object();
+    }
+
+    private function createDoneTask(bool $isCreatedNow = false): Task
+    {
+        return TaskFactory::createOne([
+                'isDone' => true,
+                'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
+            ])
+            ->object();
+    }
+
+    private function createTasks(int $number, bool $isDone = null): void
+    {
+        TaskFactory::createMany($number, [
+            'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
+        ]);
     }
 }
