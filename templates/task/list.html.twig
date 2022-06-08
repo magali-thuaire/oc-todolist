@@ -1,5 +1,10 @@
 {% extends 'base.html.twig' %}
 
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('task') }}
+{% endblock %}
+
 {% block title %}Liste des tâches{% endblock %}
 
 {% block header_img %}<img class="slide-image" src="{{ asset('build/images/todolist_content.jpg') }}" alt="todo list">{% endblock %}
@@ -48,18 +53,14 @@
                                     {% endif %}
                                 </form>
                                 {% if is_granted('DELETE', task) %}
-                                    <form action="{{ path('task_delete', {'id' : task.id }) }}">
-                                        <button class="btn btn-danger btn-sm">Supprimer</button>
-                                    </form>
+                                    <a data-href="{{ path('task_confirm_delete', {'id' : task.id }) }}" class="js-task-delete btn btn-danger btn-sm">
+                                        Supprimer
+                                    </a>
                                 {% endif %}
                             </div>
                             <div class="caption--footer--date">
                                 <p class="text-muted small">Créée le {{ task.createdAt|date('d/m/Y') }} par
-                                    {% if task.owner is not null %}
-                                        {{ task.owner.username }}
-                                    {% else %}
-                                        {{ constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
-                                    {% endif %}
+                                    {{ (task.owner) ? task.owner.username : constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
                                 </p>
                                 {% if task.done %}
                                     <p class="text-muted small">
@@ -81,4 +82,5 @@
             </div>
         {% endfor %}
     </div>
+    <div id="task__modal"></div>
 {% endblock %}

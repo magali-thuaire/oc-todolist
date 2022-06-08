@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TaskController extends BaseController
@@ -101,16 +102,33 @@ class TaskController extends BaseController
         return $this->redirectToRoute('task_list_done');
     }
 
-    #[Route(path: '/tasks/{id}/delete', name: 'task_delete', methods: 'GET')]
+    #[Route(path: '/tasks/{id}/confirm-delete', name: 'task_confirm_delete', methods: 'GET')]
     #[IsGranted('DELETE', subject: 'task')]
-    public function deleteTaskAction(Task $task): RedirectResponse
+    public function confirmDeleteTaskAction(Task $task): Response
     {
+        return $this->render('task/delete_modal.html.twig', [
+            'task' => $task,
+        ]);
+    }
+
+    #[Route(path: '/tasks/{id}/delete', name: 'task_delete', methods: 'POST')]
+    #[IsGranted('DELETE', subject: 'task')]
+    public function deleteTaskAction(Task $task, Request $request): RedirectResponse
+    {
+        if (!$this->isCsrfTokenValid('delete' . $task->getId(), $request->get('_token'))) {
+            throw new InvalidCsrfTokenException();
+        }
+
         $this->taskManager->deleteTask($task);
 
         $this->addFlash(
             'success',
             $this->translator->trans('task.delete.success', [], 'flashes')
         );
+
+        if ($task->isDone()) {
+            return $this->redirectToRoute('task_list_done');
+        }
 
         return $this->redirectToRoute('task_list');
     }

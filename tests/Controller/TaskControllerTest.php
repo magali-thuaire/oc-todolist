@@ -85,11 +85,10 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals($firstTaskFixture->getTitle(), $editTaskLink->text());
 
         // First Task - Delete
-        $deleteTaskForm = $firstTask->filter('form:last-child');
-        $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
-        $deleteBtn = $firstTask->filter('button.btn.btn-danger');
+        $deleteTaskUri = $this->getRouter()->generate('task_confirm_delete', ['id' => $firstTaskFixture->getId()]);
+        $deleteBtn = $firstTask->filter('.js-task-delete');
 
-        $this->assertEquals($deleteTaskUri, $deleteTaskForm->attr('action'));
+        $this->assertEquals($deleteTaskUri, $deleteBtn->attr('data-href'));
         $this->assertEquals('Supprimer', $deleteBtn->text());
 
         // First Task - Toggle
@@ -136,11 +135,10 @@ class TaskControllerTest extends BaseWebTestCase
         $firstTask = $crawler->filter('.tasks > .task')->first();
 
         // First Task - Delete
-        $deleteTaskForm = $firstTask->filter('form:last-child');
-        $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
-        $deleteBtn = $firstTask->filter('button.btn.btn-danger');
+        $deleteTaskUri = $this->getRouter()->generate('task_confirm_delete', ['id' => $firstTaskFixture->getId()]);
+        $deleteBtn = $firstTask->filter('.js-task-delete');
 
-        $this->assertEquals($deleteTaskUri, $deleteTaskForm->attr('action'));
+        $this->assertEquals($deleteTaskUri, $deleteBtn->attr('data-href'));
         $this->assertEquals('Supprimer', $deleteBtn->text());
     }
 
@@ -187,11 +185,10 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertSelectorNotExists('h4 > a');
 
         // First Task - Delete
-        $deleteTaskForm = $firstTask->filter('form:last-child');
-        $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
-        $deleteBtn = $firstTask->filter('button.btn.btn-danger');
+        $deleteTaskUri = $this->getRouter()->generate('task_confirm_delete', ['id' => $firstTaskFixture->getId()]);
+        $deleteBtn = $firstTask->filter('.js-task-delete');
 
-        $this->assertEquals($deleteTaskUri, $deleteTaskForm->attr('action'));
+        $this->assertEquals($deleteTaskUri, $deleteBtn->attr('data-href'));
         $this->assertEquals('Supprimer', $deleteBtn->text());
 
         // First Task - Toggle
@@ -243,11 +240,10 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals($firstTaskFixture->getTitle(), $editTaskLink->text());
 
         // First Task - Delete
-        $deleteTaskForm = $firstTask->filter('form:last-child');
-        $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
-        $deleteBtn = $firstTask->filter('button.btn.btn-danger');
+        $deleteTaskUri = $this->getRouter()->generate('task_confirm_delete', ['id' => $firstTaskFixture->getId()]);
+        $deleteBtn = $firstTask->filter('.js-task-delete');
 
-        $this->assertEquals($deleteTaskUri, $deleteTaskForm->attr('action'));
+        $this->assertEquals($deleteTaskUri, $deleteBtn->attr('data-href'));
         $this->assertEquals('Supprimer', $deleteBtn->text());
     }
 
@@ -578,7 +574,7 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getRoleUserOrRoleAdminAndTask()
      */
-    public function testTaskGETDeleteAuthorized(string $role, bool $anonymousTask)
+    public function testTaskPOSTDeleteAuthorized(string $role, bool $anonymousTask)
     {
         if ($role === 'ROLE_ADMIN') {
             $this->createAdminUserAndLogin();
@@ -591,10 +587,39 @@ class TaskControllerTest extends BaseWebTestCase
         $task = $this->createTask($anonymousTask ? null : $user);
         $taskId = $task->getId();
 
-        // Request
-        $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/delete', $task->getId()));
+        // Request confirm_delete
+        $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/confirm-delete', $task->getId()));
 
-        // Redirection
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        // Modal
+        $modal = $crawler->filter('#task__modal__delete');
+
+        // Modal header
+        $modalHeader = $modal->filter('.modal-header');
+        $this->assertEquals(
+            sprintf(
+                '%s - Tâche créée le %s par %s',
+                $task->getTitle(),
+                $task->getCreatedAt()->format('d/m/Y'),
+                ($task->getOwner()) ? $task->getOwner()->getUsername() : Task::ANONYMOUS_TASK
+            ),
+            $modalHeader->text()
+        );
+
+        // Modal body
+        $modalBody = $modal->filter('.modal-body');
+        $this->assertEquals(
+            'Etes-vous certain(e) de vouloir supprimer cette tâche ?',
+            $modalBody->text()
+        );
+
+        // Submit form
+        $form = $crawler->selectButton('Oui')->form();
+        $this->client->submit($form);
+
+        // Redirection --> POST request to '/tasks/id/delete'
         $this->assertResponseRedirects();
         $this->client->followRedirect();
 
@@ -613,7 +638,7 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getTaskAnonymousOrNot()
      */
-    public function testTaskGETDeleteForbidden(bool $anonymousTask)
+    public function testTaskPOSTDeleteForbidden(bool $anonymousTask)
     {
         // Logged User
         $this->createUserAndLogin();
@@ -627,7 +652,7 @@ class TaskControllerTest extends BaseWebTestCase
         }
 
         // Response
-        $this->forbiddenAction(Request::METHOD_GET, sprintf('/tasks/%d/delete', $task->getId()));
+        $this->forbiddenAction(Request::METHOD_POST, sprintf('/tasks/%d/delete', $task->getId()));
     }
 
     private function getUnauthorizedActions(): array
@@ -640,7 +665,7 @@ class TaskControllerTest extends BaseWebTestCase
             [Request::METHOD_GET, '/tasks/fake/edit'],
             [Request::METHOD_POST, '/tasks/fake/edit'],
             [Request::METHOD_GET, '/tasks/fake/toggle'],
-            [Request::METHOD_GET, '/tasks/fake/delete'],
+            [Request::METHOD_POST, '/tasks/fake/delete'],
         ];
     }
 
@@ -651,7 +676,7 @@ class TaskControllerTest extends BaseWebTestCase
             [Request::METHOD_GET, '/tasks/fake/edit'],
             [Request::METHOD_POST, '/tasks/fake/edit'],
             [Request::METHOD_GET, '/tasks/fake/toggle'],
-            [Request::METHOD_GET, '/tasks/fake/delete'],
+            [Request::METHOD_POST, '/tasks/fake/delete'],
         ];
     }
 
