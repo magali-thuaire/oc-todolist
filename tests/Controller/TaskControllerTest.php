@@ -53,7 +53,7 @@ class TaskControllerTest extends BaseWebTestCase
         $newUserUri = $this->getRouter()->generate('task_create');
 
         $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-        $this->assertEquals('Créer une tâche', $newUserButton->text());
+        $this->assertEquals('Créer une nouvelle tâche', $newUserButton->text());
 
         // Pagination - Previous Page
         $pagination = $crawler->filter('.pagination');
@@ -173,7 +173,7 @@ class TaskControllerTest extends BaseWebTestCase
         $newUserUri = $this->getRouter()->generate('task_create');
 
         $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-        $this->assertEquals('Créer une tâche', $newUserButton->text());
+        $this->assertEquals('Créer une nouvelle tâche', $newUserButton->text());
 
         // Tasks
         $this->assertCount(12, $crawler->filter('div.thumbnail'));
