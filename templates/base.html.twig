@@ -55,14 +55,20 @@
             <div class="row">
                 <div class="col-md-12">
                     {% for flash_message in app.session.flashBag.get('success') %}
-                        <div class="alert alert-success" role="alert">
+                        <div class="js-alert alert alert-success alert-dismissible" role="alert">
                             <strong>Superbe !</strong> {{ flash_message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     {% endfor %}
 
                     {% for flash_message in app.session.flashBag.get('error') %}
-                        <div class="alert alert-danger" role="alert">
+                        <div class="js-alert alert alert-danger alert-dismissible" role="alert">
                             <strong>Oops !</strong> {{ flash_message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     {% endfor %}
                 </div>
