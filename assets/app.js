@@ -12,3 +12,4 @@ import './styles/app.scss';
 import './bootstrap';
 
 import 'bootstrap';
+import './scripts/components/alert';
