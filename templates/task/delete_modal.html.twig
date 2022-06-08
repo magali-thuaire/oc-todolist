@@ -1,0 +1,11 @@
+{% extends  'modal/_modal.html.twig' %}
+
+{% block id %}{{ 'task__modal__delete' }}{% endblock %}
+
+{% block action %}{{ path('task_delete', {'id' : task.id }) }}{% endblock %}
+
+{% block header %}{{ task.title }} - Tâche créée le {{ task.createdAt | date('d/m/Y') }} par {{ (task.owner) ? task.owner.username : constant('App\\Entity\\Task::ANONYMOUS_TASK') }}{% endblock %}
+
+{% block body %}Etes-vous certain(e) de vouloir supprimer cette tâche ?{% endblock %}
+
+{% block csrf_token %}{{ csrf_token('delete'~task.id) }}{% endblock %}
