@@ -55,9 +55,15 @@
                                         {{ constant('App\\Entity\\Task::ANONYMOUS_TASK') }}
                                     {% endif %}
                                 </p>
-                                <p class="text-muted small">
-                                    Dernière mise à jour le {{ task.updatedAt|date('d/m/Y H:m:s') }}
-                                </p>
+                                {% if task.done %}
+                                    <p class="text-muted small">
+                                        Terminée le {{ task.doneAt|date('d/m/Y H:m:s') }}
+                                    </p>
+                                {% else %}
+                                    <p class="text-muted small">
+                                        Dernière mise à jour le {{ task.updatedAt|date('d/m/Y H:m:s') }}
+                                    </p>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

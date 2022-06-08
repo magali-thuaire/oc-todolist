@@ -80,6 +80,21 @@ class TaskControllerTest extends BaseWebTestCase
 
         $this->assertEquals($toggleTaskUri, $toggleTaskForm->attr('action'));
         $this->assertEquals('Marquer comme faite', $toggleBtn->text());
+
+        // First Task - CreatedAt Date
+        $createdAtTask = $firstTask->filter('.caption--footer--date > p.text-muted.small:first-child')->text();
+        $this->assertEquals(sprintf(
+            'Créée le %s par %s',
+            $firstTaskFixture->getCreatedAt()->format('d/m/Y'),
+            $firstTaskFixture->getOwner()->getUsername()
+        ), $createdAtTask);
+
+        // First Task - UpdatedAt Date
+        $updatedAtTask = $firstTask->filter('.caption--footer--date > p.text-muted.small:nth-child(2)')->text();
+        $this->assertEquals(sprintf(
+            'Dernière mise à jour le %s',
+            $firstTaskFixture->getUpdatedAt()->format('d/m/Y H:m:s')
+        ), $updatedAtTask);
     }
 
     public function testTaskDoneGETListAuthorized()
@@ -136,6 +151,21 @@ class TaskControllerTest extends BaseWebTestCase
 
         $this->assertEquals($toggleTaskUri, $toggleTaskForm->attr('action'));
         $this->assertEquals('Marquer comme non terminée', $toggleBtn->text());
+
+        // First Task - CreatedAt Date
+        $createdAtTask = $firstTask->filter('.caption--footer--date > p.text-muted.small:first-child')->text();
+        $this->assertEquals(sprintf(
+            'Créée le %s par %s',
+            $firstTaskFixture->getCreatedAt()->format('d/m/Y'),
+            $firstTaskFixture->getOwner()->getUsername()
+        ), $createdAtTask);
+
+        // First Task - DoneAt Date
+        $doneAtTask = $firstTask->filter('.caption--footer--date > p.text-muted.small:nth-child(2)')->text();
+        $this->assertEquals(sprintf(
+            'Terminée le %s',
+            $firstTaskFixture->getDoneAt()->format('d/m/Y H:m:s')
+        ), $doneAtTask);
     }
 
     public function testTaskDoneGETListAdmin()
@@ -444,6 +474,7 @@ class TaskControllerTest extends BaseWebTestCase
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
         $toggledTask = $taskRepository->findOneBy(['id' => $initialTask->getId()]);
         $this->assertTrue($toggledTask->isDone());
+        $this->assertNotNull($toggledTask->getDoneAt());
     }
 
     public function testTaskGETDoneToggleAuthorized()
@@ -475,6 +506,7 @@ class TaskControllerTest extends BaseWebTestCase
         $taskRepository = $this->getDoctrine()->getRepository(Task::class);
         $toggledTask = $taskRepository->findOneBy(['id' => $initialTask->getId()]);
         $this->assertFalse($toggledTask->isDone());
+        $this->assertNull($toggledTask->getDoneAt());
     }
 
     /**
@@ -644,6 +676,7 @@ class TaskControllerTest extends BaseWebTestCase
         return TaskFactory::createOne([
                 'isDone' => true,
                 'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
+                'doneAt' => new DateTime('NOW')
             ])
             ->object();
     }
