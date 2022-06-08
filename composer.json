@@ -21,6 +21,7 @@
         "symfony/flex": "^2.1",
         "symfony/form": "6.0.*",
         "symfony/framework-bundle": "6.0.*",
+        "symfony/mailer": "6.0.*",
         "symfony/monolog-bundle": "^3.1",
         "symfony/rate-limiter": "6.0.*",
         "symfony/runtime": "6.0.*",
@@ -30,6 +31,7 @@
         "symfony/validator": "6.0.*",
         "symfony/webpack-encore-bundle": "^1.14",
         "symfony/yaml": "6.0.*",
+        "symfonycasts/reset-password-bundle": "^1.13",
         "twig/extra-bundle": "^3.4",
         "twig/string-extra": "^3.4",
         "twig/twig": "^2.12|^3.0"
@@ -86,7 +88,8 @@
     "extra": {
         "symfony": {
             "allow-contrib": true,
-            "require": "6.0.*"
+            "require": "6.0.*",
+            "docker": true
         }
     }
 }
