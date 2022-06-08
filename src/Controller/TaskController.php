@@ -60,7 +60,7 @@ class TaskController extends BaseController
     }
 
     #[Route(path: '/tasks/{id}/edit', name: 'task_edit', methods: ['GET', 'POST'])]
-    #[IsGranted('EDIT', 'task')]
+    #[IsGranted('TASK_EDIT', 'task')]
     public function editAction(Task $task, Request $request): RedirectResponse|Response
     {
         $form = $this->taskManager->editTask($request, $task);
@@ -103,7 +103,7 @@ class TaskController extends BaseController
     }
 
     #[Route(path: '/tasks/{id}/confirm-delete', name: 'task_confirm_delete', methods: 'GET')]
-    #[IsGranted('DELETE', subject: 'task')]
+    #[IsGranted('TASK_DELETE', subject: 'task')]
     public function confirmDeleteTaskAction(Task $task): Response
     {
         return $this->render('task/delete_modal.html.twig', [
@@ -112,7 +112,7 @@ class TaskController extends BaseController
     }
 
     #[Route(path: '/tasks/{id}/delete', name: 'task_delete', methods: 'POST')]
-    #[IsGranted('DELETE', subject: 'task')]
+    #[IsGranted('TASK_DELETE', subject: 'task')]
     public function deleteTaskAction(Task $task, Request $request): RedirectResponse
     {
         if (!$this->isCsrfTokenValid('delete' . $task->getId(), $request->get('_token'))) {

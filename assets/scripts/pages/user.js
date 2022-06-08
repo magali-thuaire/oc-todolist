@@ -1,17 +1,26 @@
 import $ from "jquery";
 import 'datatables.net-bs';
+import ajaxModal from "../components/modal/ajax_modal";
 
 $(document).ready(function () {
 
-    // Table des articles
+    // Table des utilisateurs
     $('#user-table').DataTable({
         "order": [[0, "asc"]],
+        "search": [[1, 2]],
         "keys": true,
         "columnDefs": [
         {
             "targets": 4,
             "sortable": false
         },
+        ],
+        "columns": [
+            { "searchable": false },
+            null,
+            null,
+            { "searchable": false },
+            { "searchable": false },
         ],
         "language": {
             "sEmptyTable": "Aucune donnée disponible dans le tableau",
@@ -43,5 +52,10 @@ $(document).ready(function () {
                 }
             }
         }
+    });
+
+    $('.js-user-delete').on('click', function () {
+        let target = this;
+        ajaxModal(target, 'user__modal');
     });
 });

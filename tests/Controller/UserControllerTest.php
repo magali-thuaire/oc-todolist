@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\User;
+use App\Factory\TaskFactory;
 use App\Factory\UserFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +21,10 @@ class UserControllerTest extends BaseWebTestCase
         $this->forbiddenAction($method, $uri);
     }
 
-    public function testForbiddenUserGETEdit()
+    /**
+     * @dataProvider getForbiddenActionsWithExistingUser
+     */
+    public function testForbiddenUserWithExistingUser(string $method, string $uri)
     {
         $this->createUserAndLogin();
 
@@ -28,7 +32,7 @@ class UserControllerTest extends BaseWebTestCase
         $user = UserFactory::createOne();
 
         // Request
-        $this->client->request(Request::METHOD_GET, sprintf('/users/%d/edit', $user->getId()));
+        $this->client->request($method, sprintf($uri, $user->getId()));
 
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
@@ -72,9 +76,22 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals('Rôle', $roleColumn);
         $actionColumn = $crawler->filter('table > thead > tr > th:nth-child(5)')->text();
         $this->assertEquals('Actions', $actionColumn);
+
         // Table - Body
         $nbUsers = $crawler->filter('table > tbody')->children()->count();
         $this->assertEquals(11, $nbUsers);
+        // Table - Body Second line
+        $secondUser = $crawler->filter('table > tbody > tr:nth-child(2)');
+        $userId = $secondUser->filter('th')->text();
+        // Table - Body Second line - Edit Button
+        $editUserUri = $this->getRouter()->generate('user_edit', ['id' => $userId]);
+        $userAction = $secondUser->filter('td:last-child');
+        $editAction = $userAction->filter('a:first-child');
+        $this->assertEquals($editUserUri, $editAction->attr('href'));
+        // Table - Body Second line - Delete Button
+        $deleteUserUri = $this->getRouter()->generate('user_confirm_delete', ['id' => $userId]);
+        $deleteAction = $userAction->filter('a:last-child');
+        $this->assertEquals($deleteUserUri, $deleteAction->attr('data-href'));
     }
 
     public function testUserGETCreate()
@@ -372,6 +389,63 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $passwordError);
     }
 
+    public function testUserPOSTDelete()
+    {
+        $this->createAdminUserAndLogin();
+
+        // Initial User
+        $user = $this->createUser();
+        $userId = $user->getId();
+        TaskFactory::createMany(5);
+
+        // Request confirm_delete
+        $crawler = $this->client->request(Request::METHOD_GET, sprintf('/users/%d/confirm-delete', $user->getId()));
+
+        // Response
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        // Modal
+        $modal = $crawler->filter('#user__modal__delete');
+
+        // Modal header
+        $modalHeader = $modal->filter('.modal-header');
+        $this->assertEquals(
+            sprintf(
+                '%s - %s - Utilisateur créé le %s',
+                $user->getUsername(),
+                $user->getEmail(),
+                $user->getCreatedAt()->format('d/m/Y')
+            ),
+            $modalHeader->text()
+        );
+
+        // Modal body
+        $modalBody = $modal->filter('.modal-body');
+        $this->assertEquals(
+            'Etes-vous certain(e) de vouloir supprimer cet utilisateur ?',
+            $modalBody->text()
+        );
+
+        // Submit form
+        $form = $crawler->selectButton('Oui')->form();
+        $this->client->submit($form);
+
+        // Redirection --> POST request to '/users/id/delete'
+        $this->assertResponseRedirects();
+        $this->client->followRedirect();
+
+        // Success Message
+        $this->assertSelectorTextContains(
+            'div.alert.alert-success',
+            $this->getTranslator()->trans('user.delete.success', [], 'flashes')
+        );
+
+        // Deleted User
+        $userRepository = $this->getDoctrine()->getRepository(User::class);
+        $deletedUser = $userRepository->findOneBy(['id' => $userId]);
+        $this->assertNull($deletedUser);
+    }
+
     /**
      * @dataProvider getNotFoundActions()
      */
@@ -388,6 +462,8 @@ class UserControllerTest extends BaseWebTestCase
         return [
             [Request::METHOD_GET, '/users/fake/edit'],
             [Request::METHOD_POST, '/users/fake/edit'],
+            [Request::METHOD_GET, '/users/fake/confirm-delete'],
+            [Request::METHOD_POST, '/users/fake/delete'],
         ];
     }
 
@@ -465,6 +541,16 @@ class UserControllerTest extends BaseWebTestCase
             [Request::METHOD_GET, '/users'],
             [Request::METHOD_GET, '/users/create'],
             [Request::METHOD_POST, '/users/create'],
+        ];
+    }
+
+    public function getForbiddenActionsWithExistingUser(): array
+    {
+        // Method, Uri
+        return [
+            [Request::METHOD_GET, '/users/%d/edit'],
+            [Request::METHOD_GET, '/users/%d/confirm-delete'],
+            [Request::METHOD_POST, '/users/%d/delete'],
         ];
     }
 

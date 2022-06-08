@@ -29,14 +29,17 @@
             <tbody>
             {% for user in users %}
                 <tr>
-                    <th scope="row">{{ loop.index }}</th>
+                    <th scope="row">{{ user.id }}</th>
                     <td>{{ user.username }}</td>
                     <td>{{ user.email }}</td>
                     <td>
                         {{ (user.isAdmin) ? constant('App\\Entity\\User::ROLES')['ROLE_ADMIN'] : constant('App\\Entity\\User::ROLES')['ROLE_USER'] }}
                     </td>
                     <td>
-                        <a href="{{ path('user_edit', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
+                        <a href="{{ path('user_edit', {'id' : user.id}) }}" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-pencil"></span></a>
+                        {% if is_granted('USER_DELETE', user) %}
+                            <a data-href="{{ path('user_confirm_delete', {'id' : user.id}) }}" class="js-user-delete btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash"></span></a>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
@@ -47,4 +50,5 @@
             Il n'y a pas encore d'utilisateur enregistré.
         </div>
     {% endif %}
+    <div id="user__modal"></div>
 {% endblock %}

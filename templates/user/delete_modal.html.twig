@@ -1,0 +1,11 @@
+{% extends  'modal/_modal.html.twig' %}
+
+{% block id %}{{ 'user__modal__delete' }}{% endblock %}
+
+{% block action %}{{ path('user_delete', {'id' : user.id }) }}{% endblock %}
+
+{% block header %}{{ user.username }} - {{ user.email }} - Utilisateur créé le {{ user.createdAt | date('d/m/Y') }}{% endblock %}
+
+{% block body %}Etes-vous certain(e) de vouloir supprimer cet utilisateur ?{% endblock %}
+
+{% block csrf_token %}{{ csrf_token('delete'~user.id) }}{% endblock %}

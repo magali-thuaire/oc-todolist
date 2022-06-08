@@ -52,7 +52,7 @@
                                         </button>
                                     {% endif %}
                                 </form>
-                                {% if is_granted('DELETE', task) %}
+                                {% if is_granted('TASK_DELETE', task) %}
                                     <a data-href="{{ path('task_confirm_delete', {'id' : task.id }) }}" class="js-task-delete btn btn-danger btn-sm">
                                         Supprimer
                                     </a>
