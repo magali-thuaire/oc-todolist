@@ -27,9 +27,9 @@ class TaskControllerTest extends BaseWebTestCase
         $this->createUserAndLogin();
 
         // Undone Tasks
-        $this->createTasks(5, false);
+        $this->createTasks(20, false);
         // Done Tasks
-        $this->createTasks(5, true);
+        $this->createTasks(20, true);
 
         // First Undone Task
         $firstTaskFixture = $this->createUndoneTask();
@@ -44,6 +44,9 @@ class TaskControllerTest extends BaseWebTestCase
         $title = $crawler->filter('title');
         $this->assertStringContainsString('Liste des tâches', $title->text());
 
+        // Main Title
+        $this->assertSelectorTextSame('h1', sprintf('Liste des tâches à faire (%s)', 21));
+
         // New Task button
         $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
@@ -52,11 +55,27 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals($newUserUri, $newUserButton->attr('href'));
         $this->assertEquals('Créer une tâche', $newUserButton->text());
 
-        // Tasks
-        $this->assertCount(6, $crawler->filter('div.thumbnail'));
+        // Pagination - Previous Page
+        $pagination = $crawler->filter('.pagination');
+        $previousPage = $pagination->filter('li:nth-child(1)');
+        $this->assertEquals('Précédent', $previousPage->text());
+        // Pagination - Page 1
+        $firstPage = $pagination->filter('li:nth-child(2)');
+        $this->assertEquals(1, $firstPage->text());
+        // Pagination - Page 2
+        $secondPage = $pagination->filter('li:nth-child(3)');
+        $this->assertEquals(2, $secondPage->text());
+        $this->assertEquals('/tasks?page=2', $secondPage->filter('a')->attr('href'));
+        // Pagination - Next
+        $nextPage = $pagination->filter('li:nth-child(4)');
+        $this->assertEquals('Suivant', $nextPage->text());
+        $this->assertEquals('/tasks?page=2', $nextPage->filter('a')->attr('href'));
+
+        // Paginated Tasks
+        $this->assertCount(12, $crawler->filter('div.thumbnail'));
 
         // First Task
-        $firstTask = $crawler->filter('.tasks > .task:first-child');
+        $firstTask = $crawler->filter('.tasks > .task')->first();
 
         // First Task - Edit
         $editTaskLink = $firstTask->filter('h4 > a');
@@ -103,11 +122,11 @@ class TaskControllerTest extends BaseWebTestCase
         $this->createUserAndLogin();
 
         // Done Tasks
-        $this->createTasks(5, true);
+        $this->createTasks(20, true);
         $firstTaskFixture = $this->createDoneTask(true);
 
         // Undone Tasks
-        $this->createTasks(5, false);
+        $this->createTasks(20, false);
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks/done');
@@ -119,6 +138,9 @@ class TaskControllerTest extends BaseWebTestCase
         $title = $crawler->filter('title');
         $this->assertStringContainsString('Liste des tâches', $title->text());
 
+        // Main Title
+        $this->assertSelectorTextSame('h1', sprintf('Liste des tâches terminées (%s)', 21));
+
         // New Task button
         $this->assertNotEmpty($newUserButton = $crawler->filter('a.btn.btn-info'));
 
@@ -128,10 +150,10 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('Créer une tâche', $newUserButton->text());
 
         // Tasks
-        $this->assertCount(6, $crawler->filter('div.thumbnail'));
+        $this->assertCount(12, $crawler->filter('div.thumbnail'));
 
         // First Task
-        $firstTask = $crawler->filter('.tasks > .task:first-child');
+        $firstTask = $crawler->filter('.tasks > .task')->first();
 
         // First Task - Edit
         $this->assertSelectorNotExists('h4 > a');
@@ -183,7 +205,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         // First Task
-        $firstTask = $crawler->filter('.tasks > .task:first-child');
+        $firstTask = $crawler->filter('.tasks > .task')->first();
 
         // First Task - Edit
         $editTaskLink = $firstTask->filter('h4 > a');

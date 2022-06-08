@@ -20,9 +20,9 @@ class TaskController extends BaseController
     }
 
     #[Route(path: '/tasks', name: 'task_list', methods: 'GET')]
-    public function listUndoneAction(): Response
+    public function listUndoneAction(Request $request): Response
     {
-        $undoneTasks = $this->taskManager->listUndoneTasks();
+        $undoneTasks = $this->taskManager->listUndoneTasks($request);
 
         return $this->render('task/list.html.twig', [
             'tasks' => $undoneTasks,
@@ -30,9 +30,9 @@ class TaskController extends BaseController
     }
 
     #[Route(path: '/tasks/done', name: 'task_list_done', methods: 'GET')]
-    public function listDoneAction(): Response
+    public function listDoneAction(Request $request): Response
     {
-        $doneTasks = $this->taskManager->listDoneTasks();
+        $doneTasks = $this->taskManager->listDoneTasks($request);
 
         return $this->render('task/list.html.twig', [
             'tasks' => $doneTasks,

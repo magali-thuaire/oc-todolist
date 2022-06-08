@@ -1,62 +1,71 @@
-.task {
-    margin-top: 20px;
+.tasks {
+    &--header {
+        display: flex;
+        justify-content: space-between;
+        margin: 5px 0;
+    }
 
-    .caption {
-        height: 240px;
+    .task {
+        margin-top: 20px;
 
-        h4 {
-            white-space: nowrap;
-        }
+        .caption {
+            height: 240px;
 
-        &--body {
-            height: 120px;
-            overflow: hidden;
+            h4 {
+                white-space: nowrap;
+            }
 
-            .glyphicon {
-                &-ok {
-                    color: #5cb85c;
+            &--body {
+                height: 120px;
+                overflow: hidden;
+
+                .glyphicon {
+                    &-ok {
+                        color: #5cb85c;
+                    }
+
+                    &-remove {
+                        color: #d9534f;
+                    }
+                }
+            }
+
+            &--footer {
+                &--actions {
+                    display: flex;
+
+                    button:first-child {
+                        margin-right: 5px;
+                    }
                 }
 
-                &-remove {
-                    color: #d9534f;
+                &--date {
+                    border-top: 1px solid #ddd;
+                    margin-top: 20px;
+
+                    p {
+                        margin-top: 10px;
+                    }
                 }
             }
         }
 
-        &--footer {
-            &--actions {
+        .thumbnail {
+            padding: 5px;
+            height: 100%;
+
+            img {
+                width: 100%;
+            }
+        }
+
+        .alert {
+            &.no_task {
                 display: flex;
-
-                button:first-child {
-                    margin-right: 5px;
-                }
+                align-items: center;
+                justify-content: space-between;
             }
-
-            &--date {
-                border-top: 1px solid #ddd;
-                margin-top: 20px;
-
-                p {
-                    margin-top: 10px;
-                }
-            }
-        }
-    }
-
-    .thumbnail {
-        padding: 5px;
-        height: 100%;
-
-        img {
-            width: 100%;
-        }
-    }
-
-    .alert {
-        &.no_task {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
     }
 }
+
