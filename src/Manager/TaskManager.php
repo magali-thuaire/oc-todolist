@@ -5,6 +5,7 @@ namespace App\Manager;
 use App\Entity\Task;
 use App\Entity\User;
 use App\Form\TaskType;
+use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -15,6 +16,7 @@ class TaskManager
 {
     public function __construct(
         protected readonly ManagerRegistry $managerRegistry,
+        protected readonly TaskRepository $taskRepository,
         protected readonly EntityManagerInterface $em,
         protected readonly FormFactoryInterface $formFactory
     ) {
@@ -22,24 +24,12 @@ class TaskManager
 
     public function listUndoneTasks(): ?array
     {
-        return $this->managerRegistry
-            ->getRepository(Task::class)
-            ->findBy(
-                ['isDone' => false],
-                ['createdAt' => 'DESC' ]
-            )
-        ;
+        return $this->taskRepository->findUndoneTasks();
     }
 
     public function listDoneTasks(): ?array
     {
-        return $this->managerRegistry
-            ->getRepository(Task::class)
-            ->findBy(
-                ['isDone' => true],
-                ['createdAt' => 'DESC' ]
-            )
-        ;
+        return $this->taskRepository->findDoneTasks();
     }
 
     public function createTask(Request $request, User $user): FormInterface
@@ -51,8 +41,7 @@ class TaskManager
 
         if ($form->isSubmitted() && $form->isValid()) {
             $task->setOwner($user);
-            $this->em->persist($task);
-            $this->em->flush();
+            $this->taskRepository->add($task, true);
         }
 
         return $form;
@@ -64,7 +53,7 @@ class TaskManager
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->flush();
+            $this->taskRepository->update($task, true);
         }
 
         return $form;
@@ -73,14 +62,13 @@ class TaskManager
     public function toggle(Task $task): Task
     {
         $task->toggle();
-        $this->em->flush();
+        $this->taskRepository->update($task, true);
 
         return $task;
     }
 
     public function deleteTask(Task $task)
     {
-        $this->em->remove($task);
-        $this->em->flush();
+        $this->taskRepository->remove($task, true);
     }
 }

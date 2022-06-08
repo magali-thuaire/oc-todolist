@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
+use App\Repository\TaskRepository;
 use Datetime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: TaskRepository::class)]
 #[ORM\Table]
 class Task
 {

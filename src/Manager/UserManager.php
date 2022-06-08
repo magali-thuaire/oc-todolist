@@ -4,8 +4,7 @@ namespace App\Manager;
 
 use App\Entity\User;
 use App\Form\UserType;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\UserRepository;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,8 +13,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class UserManager
 {
     public function __construct(
-        protected readonly ManagerRegistry $managerRegistry,
-        protected readonly EntityManagerInterface $em,
+        protected readonly UserRepository $userRepository,
         protected readonly FormFactoryInterface $formFactory,
         private readonly UserPasswordHasherInterface $userPasswordHasher
     ) {
@@ -23,7 +21,7 @@ class UserManager
 
     public function listUsers(): ?array
     {
-        return $this->managerRegistry->getRepository(User::class)->findAll();
+        return $this->userRepository->findAll();
     }
 
     public function createUser(Request $request): FormInterface
@@ -39,8 +37,7 @@ class UserManager
                 ->eraseCredentials()
             ;
 
-            $this->em->persist($user);
-            $this->em->flush();
+            $this->userRepository->add($user, true);
         }
 
         return $form;
@@ -58,7 +55,7 @@ class UserManager
                 ->eraseCredentials()
             ;
 
-            $this->em->flush();
+            $this->userRepository->update($user, true);
         }
 
         return $form;
