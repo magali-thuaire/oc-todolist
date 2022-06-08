@@ -76,6 +76,7 @@ class TaskController extends BaseController
     }
 
     #[Route(path: '/tasks/{id}/edit', name: 'task_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('EDIT', 'task')]
     public function editAction(Task $task, Request $request): RedirectResponse|Response
     {
         $form = $this->createForm(TaskType::class, $task);

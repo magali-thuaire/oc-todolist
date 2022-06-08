@@ -13,6 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class TaskVoter extends Voter
 {
     public const DELETE = 'DELETE';
+    public const EDIT = 'EDIT';
     private Security $security;
 
     public function __construct(Security $security)
@@ -24,7 +25,7 @@ class TaskVoter extends Voter
     {
         // replace with your own logic
         // https://symfony.com/doc/current/security/voters.html
-        return $attribute == self::DELETE
+        return in_array($attribute, [self::DELETE, self::EDIT])
                && $subject instanceof Task;
     }
 
@@ -44,13 +45,14 @@ class TaskVoter extends Voter
             throw new Exception('Wrong type somehow passed');
         }
 
-        if ($this->security->isGranted('ROLE_TASK_DELETE')) {
+        if ($this->security->isGranted('ROLE_TASK_MANAGE')) {
             return true;
         }
 
         // ... (check conditions and return true to grant permission) ...
         return match ($attribute) {
             self::DELETE => $user === $subject->getOwner(),
+            self::EDIT => !$subject->isDone(),
             default => false,
         };
     }
