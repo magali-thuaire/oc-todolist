@@ -6,6 +6,8 @@
 {% block header_img %}{% endblock %}
 
 {% block body %}
+    <p class="created_at text-muted small text-right">Crée le {{ user.createdAt|date('d/m/Y') }}</p>
+    <p class="updated_at text-muted small text-right">Dernière mise à jour le {{ user.updatedAt|date('d/m/Y H:m:s') }}</p>
     {{ include('user/_form.html.twig', {
         action: path('user_edit', {'id' : user.id}),
         btn_text: 'Modifier'

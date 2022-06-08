@@ -42,6 +42,8 @@ final class UserFactory extends ModelFactory
     protected function getDefaults(): array
     {
         return [
+            'createdAt' => self::faker()->dateTimeBetween('-60 days', '-30 days'),
+            'updatedAt' => self::faker()->dateTimeBetween('-15 days', '-1 days'),
             'username' => self::faker()->text(25),
             'email' => self::faker()->email(),
             'plainPassword' => self::faker()->text(),
