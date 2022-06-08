@@ -6,8 +6,7 @@ use App\Entity\Task;
 use App\Entity\User;
 use App\Form\TaskType;
 use App\Repository\TaskRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
+use App\Service\PaginationService;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,21 +14,24 @@ use Symfony\Component\HttpFoundation\Request;
 class TaskManager
 {
     public function __construct(
-        protected readonly ManagerRegistry $managerRegistry,
         protected readonly TaskRepository $taskRepository,
-        protected readonly EntityManagerInterface $em,
-        protected readonly FormFactoryInterface $formFactory
+        protected readonly FormFactoryInterface $formFactory,
+        protected readonly PaginationService $paginationFactory,
     ) {
     }
 
-    public function listUndoneTasks(): ?array
+    public function listUndoneTasks(Request $request): iterable
     {
-        return $this->taskRepository->findUndoneTasks();
+        $qb = $this->taskRepository->getUndoneTasks();
+
+        return $this->paginationFactory->paginateItems($qb, $request);
     }
 
-    public function listDoneTasks(): ?array
+    public function listDoneTasks(Request $request): iterable
     {
-        return $this->taskRepository->findDoneTasks();
+        $qb = $this->taskRepository->getDoneTasks();
+
+        return $this->paginationFactory->paginateItems($qb, $request);
     }
 
     public function createTask(Request $request, User $user): FormInterface

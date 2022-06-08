@@ -45,27 +45,17 @@ class TaskRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-    * @return Task[] Returns an array of Task objects
-    */
-    public function findUndoneTasks(): array
+    public function getUndoneTasks(): QueryBuilder
     {
         return $this->getOrCreateQueryBuilder()
             ->andWhere('t.isDone = FALSE')
-            ->getQuery()
-            ->getResult()
         ;
     }
 
-    /**
-     * @return Task[] Returns an array of Task objects
-     */
-    public function findDoneTasks(): array
+    public function getDoneTasks(): QueryBuilder
     {
         return $this->getOrCreateQueryBuilder()
                     ->andWhere('t.isDone = TRUE')
-                    ->getQuery()
-                    ->getResult()
         ;
     }
 

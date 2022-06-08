@@ -5,12 +5,18 @@
 {% block header_img %}<img class="slide-image" src="{{ asset('build/images/todolist_content.jpg') }}" alt="todo list">{% endblock %}
 
 {% block body %}
-    <div>
-        {% if tasks is not empty %}
-            <a href="{{ path('task_create') }}" class="btn btn-info">Créer une tâche</a>
-        {% endif %}
-    </div>
     <div class="tasks">
+        <div>
+            {% if tasks is not empty %}
+                <a href="{{ path('task_create') }}" class="btn btn-info">Créer une tâche</a>
+            {% endif %}
+        </div>
+        <div class="tasks--header">
+            <h1 class="{{ (app.request.get('_route') == 'task_list') ? 'text-success' : 'text-warning' }}">
+                Liste des tâches {{ (app.request.get('_route') == 'task_list') ? 'à faire' : 'terminées' }} ({{ tasks|length }})
+            </h1>
+            {{ pagerfanta(tasks) }}
+        </div>
         {% for task in tasks %}
             <div class="task col-md-6 col-lg-4">
                 <div class="thumbnail">
