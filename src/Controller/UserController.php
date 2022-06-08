@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
@@ -67,5 +68,32 @@ class UserController extends BaseController
             'form' => $form,
             'user' => $user
         ]);
+    }
+
+    #[Route(path: '/users/{id}/confirm-delete', name: 'user_confirm_delete', methods: 'GET')]
+    #[IsGranted('USER_DELETE', 'user')]
+    public function confirmDeleteUserAction(User $user): Response
+    {
+        return $this->render('user/delete_modal.html.twig', [
+            'user' => $user,
+        ]);
+    }
+
+    #[Route(path: '/users/{id}/delete', name: 'user_delete', methods: 'POST')]
+    #[IsGranted('USER_DELETE', 'user')]
+    public function deleteTaskAction(User $user, Request $request): RedirectResponse
+    {
+        if (!$this->isCsrfTokenValid('delete' . $user->getId(), $request->get('_token'))) {
+            throw new InvalidCsrfTokenException();
+        }
+
+        $this->userManager->deleteUser($user);
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans('user.delete.success', [], 'flashes')
+        );
+
+        return $this->redirectToRoute('user_list');
     }
 }

@@ -665,6 +665,7 @@ class TaskControllerTest extends BaseWebTestCase
             [Request::METHOD_GET, '/tasks/fake/edit'],
             [Request::METHOD_POST, '/tasks/fake/edit'],
             [Request::METHOD_GET, '/tasks/fake/toggle'],
+            [Request::METHOD_GET, '/tasks/fake/confirm-delete'],
             [Request::METHOD_POST, '/tasks/fake/delete'],
         ];
     }
