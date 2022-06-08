@@ -21,11 +21,11 @@
 
                 .glyphicon {
                     &-ok {
-                        color: #5cb85c;
+                        color: var(--color-success);
                     }
 
                     &-remove {
-                        color: #d9534f;
+                        color: var(--color-danger);
                     }
                 }
             }
@@ -68,4 +68,3 @@
         }
     }
 }
-

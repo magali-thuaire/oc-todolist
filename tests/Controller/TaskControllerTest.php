@@ -24,7 +24,7 @@ class TaskControllerTest extends BaseWebTestCase
     public function testTaskUndoneGETListAuthorized()
     {
         // Logged User
-        $this->createUserAndLogin();
+        $user = $this->createUserAndLogin();
 
         // Undone Tasks
         $this->createTasks(20, false);
@@ -32,7 +32,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->createTasks(20, true);
 
         // First Undone Task
-        $firstTaskFixture = $this->createUndoneTask();
+        $firstTaskFixture = $this->createTask($user, false, true);
 
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/tasks');
@@ -116,14 +116,42 @@ class TaskControllerTest extends BaseWebTestCase
         ), $updatedAtTask);
     }
 
+    public function testTaskUndoneGETListAdmin()
+    {
+        // Logged User
+        $this->createAdminUserAndLogin();
+
+        // Undone Tasks
+        $this->createTasks(20, false);
+        // Done Tasks
+        $this->createTasks(20, true);
+
+        // First Undone Task
+        $firstTaskFixture = $this->createTask(null, false, true);
+
+        // Request
+        $crawler = $this->client->request(Request::METHOD_GET, '/tasks');
+
+        // First Task
+        $firstTask = $crawler->filter('.tasks > .task')->first();
+
+        // First Task - Delete
+        $deleteTaskForm = $firstTask->filter('form:last-child');
+        $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
+        $deleteBtn = $firstTask->filter('button.btn.btn-danger');
+
+        $this->assertEquals($deleteTaskUri, $deleteTaskForm->attr('action'));
+        $this->assertEquals('Supprimer', $deleteBtn->text());
+    }
+
     public function testTaskDoneGETListAuthorized()
     {
         // Logged User
-        $this->createUserAndLogin();
+        $user = $this->createUserAndLogin();
 
         // Done Tasks
         $this->createTasks(20, true);
-        $firstTaskFixture = $this->createDoneTask(true);
+        $firstTaskFixture = $this->createTask($user, true, true);
 
         // Undone Tasks
         $this->createTasks(20, false);
@@ -213,6 +241,14 @@ class TaskControllerTest extends BaseWebTestCase
 
         $this->assertEquals($editTaskUri, $editTaskLink->attr('href'));
         $this->assertEquals($firstTaskFixture->getTitle(), $editTaskLink->text());
+
+        // First Task - Delete
+        $deleteTaskForm = $firstTask->filter('form:last-child');
+        $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $firstTaskFixture->getId()]);
+        $deleteBtn = $firstTask->filter('button.btn.btn-danger');
+
+        $this->assertEquals($deleteTaskUri, $deleteTaskForm->attr('action'));
+        $this->assertEquals('Supprimer', $deleteBtn->text());
     }
 
     public function testTaskGETCreateAuthorized()
@@ -673,14 +709,15 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function createTask(?User $owner = null, bool $isDone = null): Task
+    private function createTask(?User $owner = null, bool $isDone = null, bool $isCreatedNow = false): Task
     {
         return TaskFactory::createOne([
                 'title' => 'task_title',
                 'content' => 'task_content',
                 'owner' => $owner,
                 'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1),
-            ])
+                'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
+        ])
             ->object();
     }
 
@@ -689,6 +726,7 @@ class TaskControllerTest extends BaseWebTestCase
         return TaskFactory::createOne([
                 'isDone' => false,
                 'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
+                'owner' => UserFactory::createOne()
             ])
             ->object();
     }
@@ -698,7 +736,8 @@ class TaskControllerTest extends BaseWebTestCase
         return TaskFactory::createOne([
                 'isDone' => true,
                 'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
-                'doneAt' => new DateTime('NOW')
+                'doneAt' => new DateTime('NOW'),
+                'owner' => UserFactory::createOne()
             ])
             ->object();
     }
