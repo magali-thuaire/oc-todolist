@@ -4,19 +4,19 @@ namespace App\Entity;
 
 use Datetime;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table]
 class Task
 {
+    use TimestampableEntity;
+
     #[ORM\Column]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     private ?int $id = null;
-
-    #[ORM\Column(type: 'datetime')]
-    private Datetime $createdAt;
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'task.title.not_blank')]
