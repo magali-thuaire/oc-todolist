@@ -231,6 +231,24 @@ class UserControllerTest extends BaseWebTestCase
         // Main Title
         $this->assertSelectorTextSame('h1', sprintf('Modifier %s', $user->getUsername()));
 
+        // CreatedAt date
+        $this->assertSelectorTextSame(
+            '.created_at',
+            sprintf(
+                'Crée le %s',
+                $user->getCreatedAt()->format('d/m/Y')
+            )
+        );
+
+        // UpdatedAt date
+        $this->assertSelectorTextSame(
+            '.updated_at',
+            sprintf(
+                'Dernière mise à jour le %s',
+                $user->getUpdatedAt()->format('d/m/Y H:m:s')
+            )
+        );
+
         // Form
         $updateUserUri = $this->getRouter()->generate('user_edit', ['id' => $user->getId()]);
 
