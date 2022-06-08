@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Datetime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -32,6 +33,9 @@ class Task
     #[ORM\ManyToOne(inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: true)]
     private ?User $owner = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?Datetime $doneAt;
 
     public const DONE_ACTION = 'Marquer comme faite';
     public const UNDONE_ACTION = 'Marquer comme non terminée';
@@ -98,6 +102,11 @@ class Task
     public function toggle(): self
     {
         $this->isDone = !$this->isDone;
+        $this->doneAt = null;
+
+        if ($this->isDone()) {
+            $this->doneAt = new Datetime();
+        }
 
         return $this;
     }
@@ -110,6 +119,18 @@ class Task
     public function setOwner(?User $owner): self
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getDoneAt(): ?DateTimeInterface
+    {
+        return $this->doneAt;
+    }
+
+    public function setDoneAt(?DateTimeInterface $doneAt): self
+    {
+        $this->doneAt = $doneAt;
 
         return $this;
     }

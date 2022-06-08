@@ -47,7 +47,12 @@ final class TaskFactory extends ModelFactory
     protected function initialize(): self
     {
         // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-        return $this;
+        return $this
+            ->afterInstantiate(function (Task $task): void {
+                if ($task->isDone()) {
+                    $task->setDoneAt(self::faker()->dateTimeBetween('-7 days', '-1 days'));
+                }
+            });
     }
 
     protected static function getClass(): string
