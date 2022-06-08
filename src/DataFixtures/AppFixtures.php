@@ -34,8 +34,8 @@ class AppFixtures extends Fixture
         );
 
         // Others
-        UserFactory::createMany(10);
-        TaskFactory::createMany(10);
+        UserFactory::createMany(25);
+        TaskFactory::createMany(20);
 
         // Task without owner
         TaskFactory::createMany(

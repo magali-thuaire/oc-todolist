@@ -1,5 +1,10 @@
 {% extends 'base.html.twig' %}
 
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('user') }}
+{% endblock %}
+
 {% block title %}Liste des utilisateurs{% endblock %}
 
 {% block header_title %}<h1>Liste des utilisateurs</h1>{% endblock %}
@@ -11,7 +16,7 @@
 
 {% block body %}
     {% if users %}
-        <table class="table">
+        <table id="user-table" class="table">
             <thead>
             <tr>
                 <th>#</th>
