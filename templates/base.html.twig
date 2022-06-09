@@ -37,6 +37,7 @@
                                 <ul class="dropdown-menu">
                                     <li><a href="{{ path('task_list') }}">Tâches à faire</a></li>
                                     <li><a href="{{ path('task_list_done') }}">Tâches terminées</a></li>
+                                    <li><a href="{{ path('task_create') }}">Créer un nouvelle tâche</a></li>
                                 </ul>
                             {% if is_granted('ROLE_ADMIN') %}
                                 <li><a href="{{ path('user_list') }}">Utilisateurs</a></li>

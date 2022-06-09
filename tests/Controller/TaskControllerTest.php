@@ -295,7 +295,8 @@ class TaskControllerTest extends BaseWebTestCase
         ]);
 
         // Redirection
-        $this->assertResponseRedirects();
+        $undoneTaskListUri = $this->getRouter()->generate('task_list');
+        $this->assertResponseRedirects($undoneTaskListUri);
         $this->client->followRedirect();
 
         // Success Message
@@ -448,7 +449,8 @@ class TaskControllerTest extends BaseWebTestCase
         ]);
 
         // Redirection
-        $this->assertResponseRedirects();
+        $undoneTaskListUri = $this->getRouter()->generate('task_list');
+        $this->assertResponseRedirects($undoneTaskListUri);
         $this->client->followRedirect();
 
         // Success Message
@@ -586,6 +588,7 @@ class TaskControllerTest extends BaseWebTestCase
         // Initial Task owned by user not admin
         $task = $this->createTask($anonymousTask ? null : $user);
         $taskId = $task->getId();
+        $isDoneTask = $task->isDone();
 
         // Request confirm_delete
         $crawler = $this->client->request(Request::METHOD_GET, sprintf('/tasks/%d/confirm-delete', $task->getId()));
@@ -615,12 +618,18 @@ class TaskControllerTest extends BaseWebTestCase
             $modalBody->text()
         );
 
+        // Modal Form Action --> request to '/tasks/id/delete'
+        $deleteTaskUri = $this->getRouter()->generate('task_delete', ['id' => $task->getId()]);
+        $formAction = $crawler->filter('form')->attr('action');
+        $this->assertEquals($deleteTaskUri, $formAction);
+
         // Submit form
         $form = $crawler->selectButton('Oui')->form();
         $this->client->submit($form);
 
-        // Redirection --> POST request to '/tasks/id/delete'
-        $this->assertResponseRedirects();
+        // Redirection
+        $taskListUri = ($isDoneTask) ? $this->getRouter()->generate('task_list_done') : $this->getRouter()->generate('task_list');
+        $this->assertResponseRedirects($taskListUri);
         $this->client->followRedirect();
 
         // Success Message

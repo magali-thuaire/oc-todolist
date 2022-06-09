@@ -24,7 +24,7 @@ class UserControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getForbiddenActionsWithExistingUser
      */
-    public function testForbiddenUserWithExistingUser(string $method, string $uri)
+    public function testForbiddenActionWithExistingUser(string $method, string $uri)
     {
         $this->createUserAndLogin();
 
@@ -60,7 +60,7 @@ class UserControllerTest extends BaseWebTestCase
         $newUserUri = $this->getRouter()->generate('user_create');
 
         $this->assertEquals($newUserUri, $newUserButton->attr('href'));
-        $this->assertEquals('Créer un utilisateur', $newUserButton->text());
+        $this->assertEquals('Créer un nouvel utilisateur', $newUserButton->text());
 
         // Main Title
         $this->assertSelectorTextSame('h1', 'Liste des utilisateurs');
@@ -109,7 +109,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertStringContainsString('Nouvel utilisateur', $title->text());
 
         // Main Title
-        $this->assertSelectorTextSame('h1', 'Créer un utilisateur');
+        $this->assertSelectorTextSame('h1', 'Créer un nouvel utilisateur');
 
         // Form
         $newUserUri = $this->getRouter()->generate('user_create');
@@ -117,8 +117,6 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertNotEmpty($form = $crawler->filter('form'));
         $this->assertEquals($newUserUri, $form->attr('action'));
         $this->assertSelectorExists('input[type=text]#user_username');
-        $this->assertSelectorExists('input[type=password]#user_plainPassword_first');
-        $this->assertSelectorExists('input[type=password]#user_plainPassword_second');
         $this->assertSelectorExists('input[type=email]#user_email');
         $this->assertSelectorExists('select#user_role');
         $userRoleSelected = $crawler->filter('select#user_role')->filter('option[value=ROLE_USER]')->attr('selected');
@@ -144,14 +142,13 @@ class UserControllerTest extends BaseWebTestCase
         // Form
         $this->submitCreateForm($crawler, [
             'user[username]' => 'test',
-            'user[plainPassword][first]' => 'todolist',
-            'user[plainPassword][second]' => 'todolist',
             'user[email]' => 'test@totdolist.fr',
             'user[role]' => $role
         ]);
 
         // Redirection
-        $this->assertResponseRedirects();
+        $userListUri = $this->getRouter()->generate('user_list');
+        $this->assertResponseRedirects($userListUri);
         $this->client->followRedirect();
 
         // Success Message
@@ -164,8 +161,6 @@ class UserControllerTest extends BaseWebTestCase
         $userRepository = $this->getDoctrine()->getRepository(User::class);
         $createdUser = $userRepository->findOneBy(['username' => 'test']);
         $this->assertNotEmpty($createdUser, 'user created not found');
-        $userPasswodHasher = $this->getPasswordHasher();
-        $this->assertTrue($userPasswodHasher->isPasswordValid($createdUser, 'todolist'));
         $this->assertContains($role, $createdUser->getRoles());
     }
 
@@ -198,34 +193,6 @@ class UserControllerTest extends BaseWebTestCase
         // Errors
         $fieldError = $crawler->filter($selector)->siblings()->filter('.help-block')->text();
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
-    }
-
-    /**
-     * @dataProvider getPasswordValidationErrors()
-     */
-    public function testUserPOSTCreateWithErrorsPassword(
-        ?string $firstPasswordValue,
-        ?string $secondPasswordValue,
-        string $idValidationMessage
-    ) {
-
-        $this->createAdminUserAndLogin();
-
-        // Request
-        $crawler = $this->client->request(Request::METHOD_GET, '/users/create');
-
-        // Form
-        $crawler = $this->submitCreateForm($crawler, [
-            'user[plainPassword][first]' => $firstPasswordValue,
-            'user[plainPassword][second]' => $secondPasswordValue,
-        ]);
-
-        // Response
-        $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        // Errors
-        $passwordError = $crawler->filter('#user_plainPassword_first')->siblings()->filter('.help-block')->text();
-        $this->assertEquals($this->getValidationMessage($idValidationMessage), $passwordError);
     }
 
     public function testUserGETEdit()
@@ -273,8 +240,12 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals($updateUserUri, $form->attr('action'));
 
         $this->assertInputValueSame('user[username]', $user->getUsername());
-        $this->assertSelectorExists('input[type=password]#user_plainPassword_first');
-        $this->assertSelectorExists('input[type=password]#user_plainPassword_second');
+        $this->assertInputValueSame('user[email]', $user->getEmail());
+        $resetPasswordLink = $crawler->filter('.reset-password__link');
+        $resetPasswordUri = $this->getRouter()->generate('app_reset_password_email', ['id' => $user->getId()]);
+        $this->assertEquals('Envoyer un lien de réinitialisation de mot de passe', $resetPasswordLink->text());
+        $this->assertEquals($resetPasswordUri, $resetPasswordLink->attr('href'));
+
         $userRoleSelected = $crawler->filter('select#user_role')->filter('option[value=ROLE_USER]')->attr('selected');
         $this->assertEquals('selected', $userRoleSelected);
 
@@ -301,14 +272,13 @@ class UserControllerTest extends BaseWebTestCase
         // Form
         $this->submitEditForm($crawler, [
             'user[username]' => 'user_username_updated',
-            'user[plainPassword][first]' => 'user_password_updated',
-            'user[plainPassword][second]' => 'user_password_updated',
             'user[email]' => 'user_email_updated@todolist.fr',
             'user[role]' => $role
         ]);
 
         // Redirection
-        $this->assertResponseRedirects();
+        $userListUri = $this->getRouter()->generate('user_list');
+        $this->assertResponseRedirects($userListUri);
         $this->client->followRedirect();
 
         // Success Message
@@ -321,8 +291,6 @@ class UserControllerTest extends BaseWebTestCase
         $userRepository = $this->getDoctrine()->getRepository(User::class);
         $updatedUser = $userRepository->findOneBy(['id' => $user->getId()]);
         $this->assertNotEmpty($updatedUser, 'user updated not found');
-        $userPasswodHasher = $this->getPasswordHasher();
-        $this->assertTrue($userPasswodHasher->isPasswordValid($updatedUser, 'user_password_updated'));
         $this->assertContains($role, $updatedUser->getRoles());
     }
 
@@ -356,37 +324,6 @@ class UserControllerTest extends BaseWebTestCase
         // Errors
         $fieldError = $crawler->filter($selector)->siblings()->filter('.help-block')->text();
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
-    }
-
-    /**
-     * @dataProvider getPasswordValidationErrors()
-     */
-    public function testUserPOSTEditWithErrorsPassword(
-        ?string $firstPasswordValue,
-        ?string $secondPasswordValue,
-        string $idValidationMessage
-    ) {
-
-        $this->createAdminUserAndLogin();
-
-        // Initial User
-        $user = $this->createUser();
-
-        // Request
-        $crawler = $this->client->request(Request::METHOD_POST, sprintf('/users/%d/edit', $user->getId()));
-
-        // Form
-        $crawler = $this->submitEditForm($crawler, [
-            'user[plainPassword][first]' => $firstPasswordValue,
-            'user[plainPassword][second]' => $secondPasswordValue,
-        ]);
-
-        // Response
-        $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        // Errors
-        $passwordError = $crawler->filter('#user_plainPassword_first')->siblings()->filter('.help-block')->text();
-        $this->assertEquals($this->getValidationMessage($idValidationMessage), $passwordError);
     }
 
     public function testUserPOSTDelete()
@@ -426,12 +363,18 @@ class UserControllerTest extends BaseWebTestCase
             $modalBody->text()
         );
 
+        // Modal Form Action --> request to '/users/id/delete'
+        $deleteUserUri = $this->getRouter()->generate('user_delete', ['id' => $user->getId()]);
+        $formAction = $crawler->filter('form')->attr('action');
+        $this->assertEquals($deleteUserUri, $formAction);
+
         // Submit form
         $form = $crawler->selectButton('Oui')->form();
         $this->client->submit($form);
 
-        // Redirection --> POST request to '/users/id/delete'
-        $this->assertResponseRedirects();
+        // Redirection
+        $userListUri = $this->getRouter()->generate('user_list');
+        $this->assertResponseRedirects($userListUri);
         $this->client->followRedirect();
 
         // Success Message
@@ -518,19 +461,6 @@ class UserControllerTest extends BaseWebTestCase
                 $emailSelector,
                 'user.email.unique'
             ],
-        ];
-    }
-
-    private function getPasswordValidationErrors(): array
-    {
-        // firstPasswordValue, secondPasswordValue, idValidationMessage
-        return [
-            // Password not blank
-            [null, null, 'user.password.not_blank'],
-            // Password identical
-            ['password', 'password_not_same', 'user.password.fields'],
-            // Password max length
-            [str_repeat('a', 65), str_repeat('a', 65), 'user.password.max'],
         ];
     }
 

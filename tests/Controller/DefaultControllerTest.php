@@ -35,28 +35,33 @@ class DefaultControllerTest extends BaseWebTestCase
         $navbarNav = $crawler->filter('.navbar-nav');
 
         // Header navigation - Homepage
-        $homepage = $navbarNav->filter('li:nth-child(1)');
+        $homepage = $navbarNav->filter('li:nth-of-type(1)');
         $this->assertEquals('Accueil', $homepage->text());
 
         $homepageUri = $this->getRouter()->generate('homepage');
         $this->assertEquals($homepageUri, $homepage->filter('a')->attr('href'));
 
         // Header navigation - Tasks
-        $tasks = $navbarNav->filter('li:nth-child(2)');
+        $tasks = $navbarNav->filter('li:nth-of-type(2)');
         $this->assertEquals('Tâches', $tasks->filter('a')->text());
 
         // Header navigation - Tasks - Undone
-        $undoneTasks = $tasks->filter('ul>li:nth-child(1)');
+        $undoneTasks = $tasks->filter('.dropdown-menu > li:nth-of-type(1)');
         $undoneTasksUri = $this->getRouter()->generate('task_list');
         $this->assertEquals($undoneTasksUri, $undoneTasks->filter('a')->attr('href'));
 
         // Header navigation - Tasks - Done
-        $doneTasks = $tasks->filter('ul>li:nth-child(2)');
+        $doneTasks = $tasks->filter('.dropdown-menu > li:nth-of-type(2)');
         $doneTasksUri = $this->getRouter()->generate('task_list_done');
         $this->assertEquals($doneTasksUri, $doneTasks->filter('a')->attr('href'));
 
+        // Header navigation - Task - Create
+        $newTask = $tasks->filter('.dropdown-menu > li:nth-of-type(3)');
+        $newTaskUri = $this->getRouter()->generate('task_create');
+        $this->assertEquals($newTaskUri, $newTask->filter('a')->attr('href'));
+
         // Header navigation - Logout
-        $logout = $navbarNav->filter('li:nth-child(3)');
+        $logout = $navbarNav->filter('.logout');
         $this->assertEquals('Se déconnecter', $logout->text());
 
         $logoutUri = $this->getRouter()->generate('logout');
@@ -92,11 +97,8 @@ class DefaultControllerTest extends BaseWebTestCase
         // Response
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-        // Header navigation
-        $navbarNav = $crawler->filter('.navbar-nav');
-
         // Header navigation - Users
-        $homepage = $navbarNav->filter('li:nth-child(3)');
+        $homepage = $crawler->filter('.navbar-nav > li:nth-of-type(3)');
         $this->assertEquals('Utilisateurs', $homepage->text());
     }
 

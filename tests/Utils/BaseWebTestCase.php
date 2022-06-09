@@ -14,6 +14,7 @@ use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
 class BaseWebTestCase extends WebTestCase
 {
@@ -43,6 +44,11 @@ class BaseWebTestCase extends WebTestCase
     protected function getPasswordHasher(): ?UserPasswordHasher
     {
         return $this->client->getContainer()->get('security.user_password_hasher');
+    }
+
+    protected function getResetPasswordHelper(): ?ResetPasswordHelperInterface
+    {
+        return $this->client->getContainer()->get('symfonycasts.reset_password.helper');
     }
 
     protected function getTranslator(): ?TranslatorInterface

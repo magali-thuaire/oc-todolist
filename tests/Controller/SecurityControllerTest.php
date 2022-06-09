@@ -58,11 +58,10 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertResponseRedirects();
-        $crawler = $this->client->followRedirect();
-
         $homepageUri = $this->getRouter()->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
-        $this->assertEquals($homepageUri, $crawler->getUri());
+
+        $this->assertResponseRedirects($homepageUri);
+        $this->client->followRedirect();
     }
 
     public function testSecurityPOSTLoginWithCSRFError()
@@ -81,7 +80,8 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertResponseRedirects();
+        $loginUri = $this->getRouter()->generate('login', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $this->assertResponseRedirects($loginUri);
         $this->client->followRedirect();
 
         // Errors
@@ -103,7 +103,8 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->client->submit($form);
 
         // Redirection
-        $this->assertResponseRedirects();
+        $loginUri = $this->getRouter()->generate('login', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        $this->assertResponseRedirects($loginUri);
         $this->client->followRedirect();
 
         // Errors

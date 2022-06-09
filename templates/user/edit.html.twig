@@ -10,6 +10,7 @@
     <p class="updated_at text-muted small text-right">Dernière mise à jour le {{ user.updatedAt|date('d/m/Y H:m:s') }}</p>
     {{ include('user/_form.html.twig', {
         action: path('user_edit', {'id' : user.id}),
-        btn_text: 'Modifier'
+        btn_text: 'Modifier',
+        reset_password: true
     }) }}
 {% endblock %}
