@@ -33,8 +33,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[Assert\NotBlank(message: 'user.password.not_blank')]
-    #[Assert\Length(max: 64, maxMessage: 'user.password.max')]
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 60, unique: true)]
@@ -53,6 +51,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         'ROLE_USER' => 'utilisateur',
         'ROLE_ADMIN' => 'administrateur',
     ];
+
+    public function __toString(): string
+    {
+        return $this->username;
+    }
 
     public function __construct()
     {

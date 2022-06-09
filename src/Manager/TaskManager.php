@@ -14,9 +14,9 @@ use Symfony\Component\HttpFoundation\Request;
 class TaskManager
 {
     public function __construct(
-        protected readonly TaskRepository $taskRepository,
-        protected readonly FormFactoryInterface $formFactory,
-        protected readonly PaginationService $paginationFactory,
+        private readonly TaskRepository $taskRepository,
+        private readonly FormFactoryInterface $formFactory,
+        private readonly PaginationService $paginationFactory,
     ) {
     }
 

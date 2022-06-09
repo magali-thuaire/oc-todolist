@@ -1,4 +1,4 @@
-user.create.success: "L'utilisateur a bien été ajouté."
+user.create.success: "L'utilisateur a bien été ajouté et un email de définition de mot de passe lui a été envoyé."
 user.edit.success: "L'utilisateur a bien été modifié."
 task.create.success: "La tâche a été bien été ajoutée."
 task.edit.success: "La tâche a bien été modifiée."
@@ -6,3 +6,6 @@ task.toggle.done.success: "La tâche task.title a bien été marquée comme fait
 task.toggle.undone.success: "La tâche task.title a bien été marquée comme non terminée."
 task.delete.success: "La tâche a bien été supprimée."
 user.delete.success: "L'utilisateur a bien été supprimé."
+user.reset-password.success: "Un lien de réinitialisation de mot de passe a été envoyé à l'adresse user.email"
+user.reset-password.error: "Un lien de réinitialisation non utilisé et encore valide a déjà été envoyé à l'adresse user.email il y a moins d'1 heure"
+user.change-password.success: "Votre mot de passe a bien été réinitialisé"
