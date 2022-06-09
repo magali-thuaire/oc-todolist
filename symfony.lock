@@ -96,6 +96,9 @@
     "doctrine/sql-formatter": {
         "version": "1.1.2"
     },
+    "egulias/email-validator": {
+        "version": "3.2"
+    },
     "fakerphp/faker": {
         "version": "v1.19.0"
     },
@@ -283,6 +286,18 @@
             "config/packages/lock.yaml"
         ]
     },
+    "symfony/mailer": {
+        "version": "6.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "4.3",
+            "ref": "97a61eabb351d7f6cb7702039bcfe07fe9d7e03c"
+        },
+        "files": [
+            "config/packages/mailer.yaml"
+        ]
+    },
     "symfony/maker-bundle": {
         "version": "1.43",
         "recipe": {
@@ -291,6 +306,9 @@
             "version": "1.0",
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
+    },
+    "symfony/mime": {
+        "version": "v6.0.9"
     },
     "symfony/monolog-bridge": {
         "version": "v4.4.37"
@@ -336,6 +354,9 @@
     },
     "symfony/polyfill-intl-icu": {
         "version": "v1.25.0"
+    },
+    "symfony/polyfill-intl-idn": {
+        "version": "v1.26.0"
     },
     "symfony/polyfill-intl-normalizer": {
         "version": "v1.25.0"
@@ -494,6 +515,18 @@
     },
     "symfony/yaml": {
         "version": "v4.4.37"
+    },
+    "symfonycasts/reset-password-bundle": {
+        "version": "1.13",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "97c1627c0384534997ae1047b93be517ca16de43"
+        },
+        "files": [
+            "config/packages/reset_password.yaml"
+        ]
     },
     "twig/extra-bundle": {
         "version": "v3.4.0"
