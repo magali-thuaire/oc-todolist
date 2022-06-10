@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -127,6 +128,11 @@ class BaseWebTestCase extends WebTestCase
         $this->client->loginUser($user);
 
         return $user;
+    }
+
+    protected function logoutUser(): void
+    {
+        $this->client->request(Request::METHOD_GET, '/logout');
     }
 
     protected function submitCreateForm(Crawler $crawler, array $fields): Crawler

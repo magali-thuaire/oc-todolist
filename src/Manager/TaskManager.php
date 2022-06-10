@@ -42,7 +42,7 @@ class TaskManager
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $task->setOwner($user);
+            $user->addTask($task);
             $this->taskRepository->add($task, true);
         }
 

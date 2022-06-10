@@ -1,4 +1,4 @@
-# TODOLIST
+# ToDo & Co - ToDoList App
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/24620ce050ad40cd9afc507fdd3de9e8)](https://www.codacy.com/gh/magali-thuaire/oc-todolist/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magali-thuaire/oc-todolist&amp;utm_campaign=Badge_Grade)
 
