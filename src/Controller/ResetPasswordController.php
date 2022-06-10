@@ -15,7 +15,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 
 #[Route('/reset-password')]
-#[IsGranted('ROLE_ADMIN')]
 class ResetPasswordController extends AbstractController
 {
     public function __construct(
@@ -56,6 +55,7 @@ class ResetPasswordController extends AbstractController
     }
 
     #[Route('/send-email/{id}', name: 'app_reset_password_email', methods: 'GET')]
+    #[IsGranted('ROLE_ADMIN')]
     public function sendEmail(User $user): RedirectResponse
     {
         $isEmailSent = $this->resetPasswordManager->isResetPasswordEmailSent($user);

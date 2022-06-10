@@ -52,11 +52,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         'ROLE_ADMIN' => 'administrateur',
     ];
 
-    public function __toString(): string
-    {
-        return $this->username;
-    }
-
     public function __construct()
     {
         $this->tasks = new ArrayCollection();

@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[Route('/tasks')]
 class TaskController extends BaseController
 {
     public function __construct(
@@ -20,7 +21,7 @@ class TaskController extends BaseController
     ) {
     }
 
-    #[Route(path: '/tasks', name: 'task_list', methods: 'GET')]
+    #[Route(path: '', name: 'task_list', methods: 'GET')]
     public function listUndoneAction(Request $request): Response
     {
         $undoneTasks = $this->taskManager->listUndoneTasks($request);
@@ -30,7 +31,7 @@ class TaskController extends BaseController
         ]);
     }
 
-    #[Route(path: '/tasks/done', name: 'task_list_done', methods: 'GET')]
+    #[Route(path: '/done', name: 'task_list_done', methods: 'GET')]
     public function listDoneAction(Request $request): Response
     {
         $doneTasks = $this->taskManager->listDoneTasks($request);
@@ -40,7 +41,7 @@ class TaskController extends BaseController
         ]);
     }
 
-    #[Route(path: '/tasks/create', name: 'task_create', methods: ['GET', 'POST'])]
+    #[Route(path: '/create', name: 'task_create', methods: ['GET', 'POST'])]
     public function createAction(Request $request): RedirectResponse|Response
     {
         $form = $this->taskManager->createTask($request, $this->getUser());
@@ -59,7 +60,7 @@ class TaskController extends BaseController
         ]);
     }
 
-    #[Route(path: '/tasks/{id}/edit', name: 'task_edit', methods: ['GET', 'POST'])]
+    #[Route(path: '/{id}/edit', name: 'task_edit', methods: ['GET', 'POST'])]
     #[IsGranted('TASK_EDIT', 'task')]
     public function editAction(Task $task, Request $request): RedirectResponse|Response
     {
@@ -80,7 +81,7 @@ class TaskController extends BaseController
         ]);
     }
 
-    #[Route(path: '/tasks/{id}/toggle', name: 'task_toggle', methods: 'GET')]
+    #[Route(path: '/{id}/toggle', name: 'task_toggle', methods: 'GET')]
     public function toggleTaskAction(Task $task): RedirectResponse
     {
         $task = $this->taskManager->toggle($task);
@@ -102,7 +103,7 @@ class TaskController extends BaseController
         return $this->redirectToRoute('task_list_done');
     }
 
-    #[Route(path: '/tasks/{id}/confirm-delete', name: 'task_confirm_delete', methods: 'GET')]
+    #[Route(path: '/{id}/confirm-delete', name: 'task_confirm_delete', methods: 'GET')]
     #[IsGranted('TASK_DELETE', subject: 'task')]
     public function confirmDeleteTaskAction(Task $task): Response
     {
@@ -111,7 +112,7 @@ class TaskController extends BaseController
         ]);
     }
 
-    #[Route(path: '/tasks/{id}/delete', name: 'task_delete', methods: 'POST')]
+    #[Route(path: '/{id}/delete', name: 'task_delete', methods: 'POST')]
     #[IsGranted('TASK_DELETE', subject: 'task')]
     public function deleteTaskAction(Task $task, Request $request): RedirectResponse
     {

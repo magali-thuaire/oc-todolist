@@ -2,13 +2,14 @@
 
 namespace App\Controller;
 
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends BaseController
 {
-    #[Route(path: '/login', name: 'login', methods: 'GET')]
+    #[Route(path: '/login', name: 'login', methods: ['GET', 'POST'])]
     public function loginAction(AuthenticationUtils $authenticationUtils): Response
     {
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -20,15 +21,10 @@ class SecurityController extends BaseController
         ]);
     }
 
-    #[Route(path: '/login_check', name: 'login_check', methods: 'POST')]
-    public function loginCheck(): void
-    {
-        // This code is never executed.
-    }
-
     #[Route(path: '/logout', name: 'logout', methods: 'GET')]
     public function logoutCheck(): void
     {
-        // This code is never executed.
+        // controller can be blank: it will never be called!
+        throw new Exception('Don\'t forget to activate logout in security.yaml');
     }
 }

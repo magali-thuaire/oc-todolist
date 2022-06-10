@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[Route('/users')]
 #[IsGranted('ROLE_ADMIN')]
 class UserController extends BaseController
 {
@@ -21,7 +22,7 @@ class UserController extends BaseController
     ) {
     }
 
-    #[Route(path: '/users', name: 'user_list', methods: 'GET')]
+    #[Route(path: '', name: 'user_list', methods: 'GET')]
     public function listAction(): Response
     {
         $users = $this->userManager->listUsers();
@@ -31,7 +32,7 @@ class UserController extends BaseController
         ]);
     }
 
-    #[Route(path: '/users/create', name: 'user_create', methods: ['GET', 'POST'])]
+    #[Route(path: '/create', name: 'user_create', methods: ['GET', 'POST'])]
     public function createAction(Request $request): RedirectResponse|Response
     {
         $form = $this->userManager->createUser($request);
@@ -50,7 +51,7 @@ class UserController extends BaseController
         ]);
     }
 
-    #[Route(path: '/users/{id}/edit', name: 'user_edit', methods: ['GET', 'POST'])]
+    #[Route(path: '/{id}/edit', name: 'user_edit', methods: ['GET', 'POST'])]
     public function editAction(User $user, Request $request): RedirectResponse|Response
     {
         $form = $this->userManager->editUser($request, $user);
@@ -70,7 +71,7 @@ class UserController extends BaseController
         ]);
     }
 
-    #[Route(path: '/users/{id}/confirm-delete', name: 'user_confirm_delete', methods: 'GET')]
+    #[Route(path: '/{id}/confirm-delete', name: 'user_confirm_delete', methods: 'GET')]
     #[IsGranted('USER_DELETE', 'user')]
     public function confirmDeleteUserAction(User $user): Response
     {
@@ -79,7 +80,7 @@ class UserController extends BaseController
         ]);
     }
 
-    #[Route(path: '/users/{id}/delete', name: 'user_delete', methods: 'POST')]
+    #[Route(path: '/{id}/delete', name: 'user_delete', methods: 'POST')]
     #[IsGranted('USER_DELETE', 'user')]
     public function deleteTaskAction(User $user, Request $request): RedirectResponse
     {

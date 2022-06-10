@@ -11,16 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
 class ResetPasswordControllerTest extends BaseWebTestCase
 {
     /**
-     * @dataProvider getForbiddenActions
-     */
-    public function testForbiddenAction(string $method, string $uri)
-    {
-        $this->createUserAndLogin();
-
-        $this->forbiddenAction($method, $uri);
-    }
-
-    /**
      * @dataProvider getForbiddenActionsWithExistingUser
      */
     public function testForbiddenActionWithExistingUser(string $method, string $uri)
@@ -79,6 +69,9 @@ class ResetPasswordControllerTest extends BaseWebTestCase
         $newUser = $this->getEntityManager()->getRepository(User::class)->findOneBy(['id' => $user->getId()]);
         $token = $this->getResetPasswordHelper()->generateResetToken($newUser);
 
+        // Logout Admin
+        $this->logoutUser();
+
         // Request
         $crawler = $this->client->request(
             Request::METHOD_GET,
@@ -136,7 +129,7 @@ class ResetPasswordControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getPasswordValidationErrors()
      */
-    public function testUserPOSTEditWithErrorsPassword(
+    public function testResetPasswordPOSTResetWithErrorsPassword(
         ?string $firstPasswordValue,
         ?string $secondPasswordValue,
         string $idValidationMessage
@@ -146,6 +139,9 @@ class ResetPasswordControllerTest extends BaseWebTestCase
         $user = $this->createUser();
         $newUser = $this->getEntityManager()->getRepository(User::class)->findOneBy(['id' => $user->getId()]);
         $token = $this->getResetPasswordHelper()->generateResetToken($newUser);
+
+        // Logout Admin
+        $this->logoutUser();
 
         // Request
         $crawler = $this->client->request(
@@ -166,15 +162,6 @@ class ResetPasswordControllerTest extends BaseWebTestCase
         // Errors
         $passwordError = $crawler->filter('#change_password_form_plainPassword_first')->siblings()->filter('.help-block')->text();
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $passwordError);
-    }
-
-    private function getForbiddenActions(): array
-    {
-        // Method, Uri
-        return [
-            [Request::METHOD_GET, '/reset-password/reset'],
-            [Request::METHOD_POST, '/reset-password/reset'],
-        ];
     }
 
     private function getForbiddenActionsWithExistingUser(): array

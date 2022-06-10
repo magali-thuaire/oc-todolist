@@ -34,7 +34,7 @@ class SecurityControllerTest extends BaseWebTestCase
         // Form
         $this->assertSelectorExists('form');
         $form = $crawler->filter('form');
-        $checkLoginUri = $this->getRouter()->generate('login_check');
+        $checkLoginUri = $this->getRouter()->generate('login');
 
         $this->assertEquals($checkLoginUri, $form->attr('action'));
         $this->assertSelectorExists('input[type=text]#username');
