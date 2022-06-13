@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Form\TaskType;
 use App\Repository\TaskRepository;
 use App\Service\PaginationService;
+use Pagerfanta\PagerfantaInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,18 +17,18 @@ class TaskManager
     public function __construct(
         private readonly TaskRepository $taskRepository,
         private readonly FormFactoryInterface $formFactory,
-        private readonly PaginationService $paginationFactory,
+        private readonly PaginationService $paginationFactory
     ) {
     }
 
-    public function listUndoneTasks(Request $request): iterable
+    public function listUndoneTasks(Request $request): PagerfantaInterface
     {
         $qb = $this->taskRepository->getUndoneTasks();
 
         return $this->paginationFactory->paginateItems($qb, $request);
     }
 
-    public function listDoneTasks(Request $request): iterable
+    public function listDoneTasks(Request $request): PagerfantaInterface
     {
         $qb = $this->taskRepository->getDoneTasks();
 

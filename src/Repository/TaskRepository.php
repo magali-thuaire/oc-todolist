@@ -61,7 +61,11 @@ class TaskRepository extends ServiceEntityRepository
 
     private function getOrCreateQueryBuilder(QueryBuilder $qb = null): QueryBuilder
     {
-        return $qb ?: $this->createQueryBuilder('t')->orderBy('t.createdAt', 'DESC');
+        return $qb ?: $this->createQueryBuilder('t')
+                            ->leftJoin('t.owner', 'u')
+                            ->addSelect('u')
+                            ->orderBy('t.createdAt', 'DESC')
+            ;
     }
 
 //    /**

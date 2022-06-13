@@ -5,6 +5,7 @@ namespace App\Service;
 use Doctrine\ORM\QueryBuilder;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Pagerfanta;
+use Pagerfanta\PagerfantaInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -15,7 +16,7 @@ class PaginationService
     ) {
     }
 
-    public function paginateItems(QueryBuilder $qb, Request $request): iterable
+    public function paginateItems(QueryBuilder $qb, Request $request): PagerfantaInterface
     {
         $currentPage = $request->query->get('page', 1);
         $maxItemsPerPage = $this->parameterBag->get('pagination.items_per_page');
