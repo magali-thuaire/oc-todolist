@@ -9,7 +9,7 @@ Work carried out as part of the training course "Application Developer - PHP / S
 
 **Framework and libraries**
 
-Framework: <span style="color:pink">**Symfony 6.0.9**</span>  
+Framework: <span style="color:pink">**Symfony 6.1.1**</span>  
 Dependencies manager: **Composer 2.3.6**
 
 ## Setup
