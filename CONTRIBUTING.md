@@ -42,7 +42,7 @@ symfony run bin/phpunit
 Update the coverage test file, with the following command:
 
 ```
-symfony run bin/phpunit --coverage-html tests/test-coverage
+symfony run bin/phpunit --coverage-clover tests/test-coverage
 ```
 
 Don't forget to commit this new tests/coverage.xml file!
