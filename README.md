@@ -77,6 +77,14 @@ If you do *not* want to use Docker, just make sure to start your own
 database server and update the `DATABASE_URL` environment variable in
 `.env` or `.env.local` before running the commands above.
 
+**Mailer Setup**
+
+The SMTP server is configured in the `docker-compose.yaml` file.
+
+If you do *not* want to use Docker, just make sure to start your own
+SMTP server and update the `MAILER_DSN` environment variable in
+`.env` or `.env.local`.
+
 **Start the Symfony web server**
 
 You can use Nginx or Apache, but Symfony's local web server
