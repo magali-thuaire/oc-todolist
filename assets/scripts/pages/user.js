@@ -22,6 +22,12 @@ $(document).ready(function () {
             { "searchable": false },
             { "searchable": false },
         ],
+        "drawCallback": function () {
+            $('.js-user-delete').on('click', function () {
+                let target = this;
+                ajaxModal(target, 'user__modal');
+            });
+        },
         "language": {
             "sEmptyTable": "Aucune donnée disponible dans le tableau",
             "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
@@ -52,10 +58,5 @@ $(document).ready(function () {
                 }
             }
         }
-    });
-
-    $('.js-user-delete').on('click', function () {
-        let target = this;
-        ajaxModal(target, 'user__modal');
     });
 });
