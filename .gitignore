@@ -4,8 +4,6 @@
 
 /tools/rector/vendor
 .phpunit.result.cache
-/tools/php-cs-fixer/vendor
-.php-cs-fixer.cache
 /tools/php-code-sniffer/vendor
 
 ###> symfony/phpunit-bridge ###
@@ -27,3 +25,8 @@ yarn-error.log
 ###< symfony/webpack-encore-bundle ###
 
 /tests/test-coverage-html
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###

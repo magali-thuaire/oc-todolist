@@ -1,14 +1,14 @@
 <?php
+
 $finder = PhpCsFixer\Finder::create()
             ->in(__DIR__.'/src')
+            ->exclude(__DIR__.'/src/Kernel.php')
 ;
 $config = new PhpCsFixer\Config();
+
 return $config->setRules([
     '@Symfony' => true,
     'yoda_style' => false,
-    'class_attributes_separation' => [
-        'elements' => ['method' => 'one', 'property' => 'one', 'trait_import' => 'one']
-    ]
 ])
      ->setFinder($finder)
 ;
