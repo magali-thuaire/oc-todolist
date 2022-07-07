@@ -15,22 +15,21 @@ class UserType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
         /** @var User $user */
         $user = $builder->getData();
         $isEdit = $user->getId();
 
         $builder
             ->add('username', TextType::class, [
-                'label' => 'Nom d\'utilisateur'
+                'label' => 'Nom d\'utilisateur',
             ])
             ->add('email', EmailType::class, [
-                'label' => 'Adresse email'
+                'label' => 'Adresse email',
             ])
             ->add('role', ChoiceType::class, [
                 'mapped' => false,
                 'choices' => array_flip(User::ROLES),
-                'data' => ($isEdit && $user->isAdmin()) ? 'ROLE_ADMIN' : 'ROLE_USER'
+                'data' => ($isEdit && $user->isAdmin()) ? 'ROLE_ADMIN' : 'ROLE_USER',
             ])
         ;
 

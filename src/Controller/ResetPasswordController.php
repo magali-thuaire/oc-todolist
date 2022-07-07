@@ -26,7 +26,6 @@ class ResetPasswordController extends AbstractController
     #[Route('/reset/{token}', name: 'app_reset_password', methods: ['GET', 'POST'])]
     public function reset(Request $request, string $token = null): Response
     {
-
         $form = $this->resetPasswordManager->resetPassword($token, $request);
 
         if (!$form instanceof FormInterface) {

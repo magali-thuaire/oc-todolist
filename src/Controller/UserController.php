@@ -67,7 +67,7 @@ class UserController extends BaseController
 
         return $this->renderForm('user/edit.html.twig', [
             'form' => $form,
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
@@ -84,7 +84,7 @@ class UserController extends BaseController
     #[IsGranted('USER_DELETE', 'user')]
     public function deleteTaskAction(User $user, Request $request): RedirectResponse
     {
-        if (!$this->isCsrfTokenValid('delete' . $user->getId(), $request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete'.$user->getId(), $request->get('_token'))) {
             throw new InvalidCsrfTokenException();
         }
 

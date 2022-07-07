@@ -116,7 +116,7 @@ class TaskController extends BaseController
     #[IsGranted('TASK_DELETE', subject: 'task')]
     public function deleteTaskAction(Task $task, Request $request): RedirectResponse
     {
-        if (!$this->isCsrfTokenValid('delete' . $task->getId(), $request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete'.$task->getId(), $request->get('_token'))) {
             throw new InvalidCsrfTokenException();
         }
 

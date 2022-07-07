@@ -31,7 +31,7 @@ class ChangePasswordFormType extends AbstractType
                     ],
                 ],
                 'second_options' => [
-                    'label' => 'Tapez le mot de passe à nouveau'
+                    'label' => 'Tapez le mot de passe à nouveau',
                 ],
             ])
         ;
