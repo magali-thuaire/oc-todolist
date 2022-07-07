@@ -39,6 +39,9 @@ final class UserFactory extends ModelFactory
         ]);
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function getDefaults(): array
     {
         return [

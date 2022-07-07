@@ -17,7 +17,7 @@ class AppMailer
     ) {
     }
 
-    public function sendEmailResetPassword(User $user, ResetPasswordToken $resetToken)
+    public function sendEmailResetPassword(User $user, ResetPasswordToken $resetToken): void
     {
         $email = (new TemplatedEmail())
             ->to($user->getEmail())
@@ -34,7 +34,7 @@ class AppMailer
         }
     }
 
-    public function sendEmailNewPassword(User $user, ResetPasswordToken $resetToken)
+    public function sendEmailNewPassword(User $user, ResetPasswordToken $resetToken): void
     {
         $email = (new TemplatedEmail())
             ->to($user->getEmail())

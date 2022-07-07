@@ -20,6 +20,9 @@ class TaskVoter extends Voter
     ) {
     }
 
+    /**
+     * @param Task $subject
+     */
     protected function supports(string $attribute, $subject): bool
     {
         // replace with your own logic
@@ -30,6 +33,8 @@ class TaskVoter extends Voter
 
     /**
      * @throws Exception
+     *
+     * @param Task $subject
      */
     protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token): bool
     {

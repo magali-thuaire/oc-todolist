@@ -24,6 +24,9 @@ class UserManager
     ) {
     }
 
+    /**
+     * @return User[]|null
+     */
     public function listUsers(): ?array
     {
         return $this->userRepository->findAll();
@@ -68,7 +71,7 @@ class UserManager
         return $form;
     }
 
-    public function deleteUser(User $user)
+    public function deleteUser(User $user): void
     {
         $this->userRepository->remove($user, true);
     }

@@ -18,7 +18,7 @@ class PaginationService
 
     public function paginateItems(QueryBuilder $qb, Request $request): PagerfantaInterface
     {
-        $currentPage = $request->query->get('page', 1);
+        $currentPage = (int) $request->query->get('page', '1');
         $maxItemsPerPage = $this->parameterBag->get('pagination.items_per_page');
 
         $adapter = new QueryAdapter($qb);

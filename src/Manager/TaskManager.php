@@ -70,7 +70,7 @@ class TaskManager
         return $task;
     }
 
-    public function deleteTask(Task $task)
+    public function deleteTask(Task $task): void
     {
         $this->taskRepository->remove($task, true);
     }

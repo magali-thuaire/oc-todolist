@@ -36,7 +36,7 @@ class Task
     private ?User $owner = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?Datetime $doneAt;
+    private ?DateTimeInterface $doneAt;
 
     public const DONE_ACTION = 'Marquer comme faite';
     public const UNDONE_ACTION = 'Marquer comme non terminée';

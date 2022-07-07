@@ -18,6 +18,9 @@ class UserVoter extends Voter
     ) {
     }
 
+    /**
+     * @param User $subject
+     */
     protected function supports(string $attribute, $subject): bool
     {
         // replace with your own logic
@@ -26,6 +29,9 @@ class UserVoter extends Voter
             && $subject instanceof User;
     }
 
+    /**
+     * @param User $subject
+     */
     protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token): bool
     {
         $user = $token->getUser();
