@@ -2,22 +2,22 @@
 
 namespace App\Tests\Controller;
 
+use App\Tests\Utils\BaseWebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use App\Tests\Utils\BaseWebTestCase;
 
 class SecurityControllerTest extends BaseWebTestCase
 {
     /**
      * @dataProvider getUnauthorizedActions
      */
-    public function testUnauthorizedAction(string $method, string $uri)
+    public function testUnauthorizedAction(string $method, string $uri): void
     {
         $this->unauthorizedAction($method, $uri);
     }
 
-    public function testSecurityGETLogin()
+    public function testSecurityGETLogin(): void
     {
         $crawler = $this->client->request(Request::METHOD_GET, '/login');
 
@@ -42,7 +42,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Se connecter');
     }
 
-    public function testSecurityPOSTLogin()
+    public function testSecurityPOSTLogin(): void
     {
         // Request
         $crawler = $this->client->request(Request::METHOD_GET, '/login');
@@ -64,7 +64,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->client->followRedirect();
     }
 
-    public function testSecurityPOSTLoginWithCSRFError()
+    public function testSecurityPOSTLoginWithCSRFError(): void
     {
         $crawler = $this->client->request(Request::METHOD_GET, '/login');
 
@@ -75,7 +75,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $form = $crawler->selectButton('Se connecter')->form([
             '_username' => $user->getUsername(),
             '_password' => 'todolist',
-            '_csrf_token' => 'csrf_token_invalid'
+            '_csrf_token' => 'csrf_token_invalid',
         ]);
         $this->client->submit($form);
 
@@ -88,7 +88,7 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->assertSelectorTextSame('div.alert.alert-danger', 'Jeton CSRF invalide.');
     }
 
-    public function testSecurityPOSTLoginWithErrors()
+    public function testSecurityPOSTLoginWithErrors(): void
     {
         $crawler = $this->client->request(Request::METHOD_GET, '/login');
 
@@ -111,7 +111,10 @@ class SecurityControllerTest extends BaseWebTestCase
         $this->assertSelectorTextSame('div.alert.alert-danger', 'Identifiants invalides.');
     }
 
-    private function getUnauthorizedActions(): array
+    /**
+     * @return array<int, array<int, string>>
+     */
+    public function getUnauthorizedActions(): array
     {
         // Method, Uri
         return [

@@ -13,7 +13,7 @@ class ResetPasswordControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getForbiddenActionsWithExistingUser
      */
-    public function testForbiddenActionWithExistingUser(string $method, string $uri)
+    public function testForbiddenActionWithExistingUser(string $method, string $uri): void
     {
         $this->createUserAndLogin();
 
@@ -30,14 +30,14 @@ class ResetPasswordControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getNotFoundActions()
      */
-    public function testUser404Exception(string $method, string $uri)
+    public function testUser404Exception(string $method, string $uri): void
     {
         $this->createAdminUserAndLogin();
 
         $this->notFound404Exception($method, $uri);
     }
 
-    public function testResetPasswordGETSendEmail()
+    public function testResetPasswordGETSendEmail(): void
     {
         $this->createAdminUserAndLogin();
 
@@ -61,7 +61,7 @@ class ResetPasswordControllerTest extends BaseWebTestCase
         );
     }
 
-    public function testResetPasswordPOSTReset()
+    public function testResetPasswordPOSTReset(): void
     {
         $this->createAdminUserAndLogin();
 
@@ -133,7 +133,7 @@ class ResetPasswordControllerTest extends BaseWebTestCase
         ?string $firstPasswordValue,
         ?string $secondPasswordValue,
         string $idValidationMessage
-    ) {
+    ): void {
         $this->createAdminUserAndLogin();
 
         $user = $this->createUser();
@@ -164,7 +164,10 @@ class ResetPasswordControllerTest extends BaseWebTestCase
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $passwordError);
     }
 
-    private function getForbiddenActionsWithExistingUser(): array
+    /**
+     * @return array<array<int, string>>
+     */
+    public function getForbiddenActionsWithExistingUser(): array
     {
         // Method, Uri
         return [
@@ -172,7 +175,10 @@ class ResetPasswordControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function getNotFoundActions(): array
+    /**
+     * @return array<array<int, string>>
+     */
+    public function getNotFoundActions(): array
     {
         // Method, Uri
         return [
@@ -180,16 +186,19 @@ class ResetPasswordControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function getPasswordValidationErrors(): array
+    /**
+     * @return array<int, array<int, ?string>>
+     */
+    public function getPasswordValidationErrors(): array
     {
         // firstPasswordValue, secondPasswordValue, idValidationMessage
         return [
-        // Password not blank
-        [null, null, 'user.password.not_blank'],
-        // Password identical
-        ['password', 'password_not_same', 'user.password.fields'],
-        // Password max length
-        [str_repeat('a', 65), str_repeat('a', 65), 'user.password.max'],
+            // Password not blank
+            [null, null, 'user.password.not_blank'],
+            // Password identical
+            ['password', 'password_not_same', 'user.password.fields'],
+            // Password max length
+            [str_repeat('a', 65), str_repeat('a', 65), 'user.password.max'],
         ];
     }
 }

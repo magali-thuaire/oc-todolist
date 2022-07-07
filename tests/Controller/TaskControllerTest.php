@@ -6,22 +6,22 @@ use App\Entity\Task;
 use App\Entity\User;
 use App\Factory\TaskFactory;
 use App\Factory\UserFactory;
+use App\Tests\Utils\BaseWebTestCase;
 use DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Tests\Utils\BaseWebTestCase;
 
 class TaskControllerTest extends BaseWebTestCase
 {
     /**
      * @dataProvider getUnauthorizedActions
      */
-    public function testUnauthorizedAction(string $method, string $uri)
+    public function testUnauthorizedAction(string $method, string $uri): void
     {
         $this->unauthorizedAction($method, $uri);
     }
 
-    public function testTaskUndoneGETListAuthorized()
+    public function testTaskUndoneGETListAuthorized(): void
     {
         // Logged User
         $user = $this->createUserAndLogin();
@@ -115,7 +115,7 @@ class TaskControllerTest extends BaseWebTestCase
         ), $updatedAtTask);
     }
 
-    public function testTaskUndoneGETListAdmin()
+    public function testTaskUndoneGETListAdmin(): void
     {
         // Logged User
         $this->createAdminUserAndLogin();
@@ -142,7 +142,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('Supprimer', $deleteBtn->text());
     }
 
-    public function testTaskDoneGETListAuthorized()
+    public function testTaskDoneGETListAuthorized(): void
     {
         // Logged User
         $user = $this->createUserAndLogin();
@@ -215,7 +215,7 @@ class TaskControllerTest extends BaseWebTestCase
         ), $doneAtTask);
     }
 
-    public function testTaskDoneGETListAdmin()
+    public function testTaskDoneGETListAdmin(): void
     {
         // Logged User
         $this->createAdminUserAndLogin();
@@ -247,7 +247,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals('Supprimer', $deleteBtn->text());
     }
 
-    public function testTaskGETCreateAuthorized()
+    public function testTaskGETCreateAuthorized(): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -280,7 +280,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertSelectorTextSame('button.btn.btn-success[type=submit]', 'Ajouter');
     }
 
-    public function testTaskPOSTCreateAuthorized()
+    public function testTaskPOSTCreateAuthorized(): void
     {
         // Logged User
         $user = $this->createUserAndLogin();
@@ -321,8 +321,7 @@ class TaskControllerTest extends BaseWebTestCase
         ?string $fieldValue,
         string $selector,
         string $idValidationMessage
-    ) {
-
+    ): void {
         // Logged User
         $this->createUserAndLogin();
 
@@ -345,7 +344,7 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getOwner()
      */
-    public function testTaskUndoneGETEditAuthorized(bool $anonymousTask)
+    public function testTaskUndoneGETEditAuthorized(bool $anonymousTask): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -394,7 +393,7 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getOwner()
      */
-    public function testTaskDoneGETEditAuthorized(bool $anonymousTask)
+    public function testTaskDoneGETEditAuthorized(bool $anonymousTask): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -413,7 +412,7 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getOwner()
      */
-    public function testTaskUndoneGETEditAdmin(bool $anonymousTask)
+    public function testTaskUndoneGETEditAdmin(bool $anonymousTask): void
     {
         // Logged User
         $this->createAdminUserAndLogin();
@@ -429,7 +428,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
-    public function testTaskPOSTEditAuthorized()
+    public function testTaskPOSTEditAuthorized(): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -477,7 +476,7 @@ class TaskControllerTest extends BaseWebTestCase
         ?string $fieldValue,
         string $selector,
         string $idValidationMessage
-    ) {
+    ): void {
         // Logged User
         $this->createUserAndLogin();
 
@@ -501,7 +500,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
     }
 
-    public function testTaskGETUndoneToggleAuthorized()
+    public function testTaskGETUndoneToggleAuthorized(): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -533,7 +532,7 @@ class TaskControllerTest extends BaseWebTestCase
         $this->assertNotNull($toggledTask->getDoneAt());
     }
 
-    public function testTaskGETDoneToggleAuthorized()
+    public function testTaskGETDoneToggleAuthorized(): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -568,7 +567,7 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getNotFoundActions()
      */
-    public function testTask404Exception(string $method, string $uri)
+    public function testTask404Exception(string $method, string $uri): void
     {
         $this->notFound404Exception($method, $uri);
     }
@@ -576,13 +575,13 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getRoleUserOrRoleAdminAndTask()
      */
-    public function testTaskPOSTDeleteAuthorized(string $role, bool $anonymousTask)
+    public function testTaskPOSTDeleteAuthorized(string $role, bool $anonymousTask): void
     {
+        $user = $this->createUserAndLogin();
+
         if ($role === 'ROLE_ADMIN') {
             $this->createAdminUserAndLogin();
             $user = $this->createUser();
-        } elseif ($role === 'ROLE_USER') {
-            $user = $this->createUserAndLogin();
         }
 
         // Initial Task owned by user not admin
@@ -647,7 +646,7 @@ class TaskControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getTaskAnonymousOrNot()
      */
-    public function testTaskPOSTDeleteForbidden(bool $anonymousTask)
+    public function testTaskPOSTDeleteForbidden(bool $anonymousTask): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -664,7 +663,10 @@ class TaskControllerTest extends BaseWebTestCase
         $this->forbiddenAction(Request::METHOD_POST, sprintf('/tasks/%d/delete', $task->getId()));
     }
 
-    private function getUnauthorizedActions(): array
+    /**
+     * @return array<array<int, string>>
+     */
+    public function getUnauthorizedActions(): array
     {
         // Method, Uri
         return [
@@ -679,7 +681,10 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function getNotFoundActions(): array
+    /**
+     * @return array<array<int, string>>
+     */
+    public function getNotFoundActions(): array
     {
         // Method, Uri
         return [
@@ -690,7 +695,10 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function getValidationErrors(): array
+    /**
+     * @return array<array<?string>>
+     */
+    public function getValidationErrors(): array
     {
         $titleField = 'task[title]';
         $titleSelector = 'input[type=text]#task_title';
@@ -704,19 +712,22 @@ class TaskControllerTest extends BaseWebTestCase
                 $titleField,
                 null,
                 $titleSelector,
-                'task.title.not_blank'
+                'task.title.not_blank',
             ],
             // Content not blank
             [
                 $contentField,
                 null,
                 $contentSelector,
-                'task.content.not_blank'
+                'task.content.not_blank',
             ],
         ];
     }
 
-    private function getRoleUserOrRoleAdminAndTask(): array
+    /**
+     * @return array<array<bool|string>>
+     */
+    public function getRoleUserOrRoleAdminAndTask(): array
     {
         // User Role, anonymous task
         return [
@@ -726,21 +737,27 @@ class TaskControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function getTaskAnonymousOrNot(): array
+    /**
+     * @return array<array<bool>>
+     */
+    public function getTaskAnonymousOrNot(): array
     {
         // Anonymous Task
         return [
             [true],
-            [false]
+            [false],
         ];
     }
 
-    private function getOwner(): array
+    /**
+     * @return array<array<bool>>
+     */
+    public function getOwner(): array
     {
         // Anonymous User
         return [
             [true],
-            [false]
+            [false],
         ];
     }
 
@@ -761,7 +778,7 @@ class TaskControllerTest extends BaseWebTestCase
         return TaskFactory::createOne([
                 'isDone' => false,
                 'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
-                'owner' => UserFactory::createOne()
+                'owner' => UserFactory::createOne(),
             ])
             ->object();
     }
@@ -772,7 +789,7 @@ class TaskControllerTest extends BaseWebTestCase
                 'isDone' => true,
                 'createdAt' => $isCreatedNow ? new DateTime('NOW') : new DateTime('-1day'),
                 'doneAt' => new DateTime('NOW'),
-                'owner' => UserFactory::createOne()
+                'owner' => UserFactory::createOne(),
             ])
             ->object();
     }
@@ -780,7 +797,7 @@ class TaskControllerTest extends BaseWebTestCase
     private function createTasks(int $number, bool $isDone = null): void
     {
         TaskFactory::createMany($number, [
-            'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1)
+            'isDone' => is_bool($isDone) ? $isDone : (bool) random_int(0, 1),
         ]);
     }
 }

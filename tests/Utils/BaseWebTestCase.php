@@ -57,12 +57,15 @@ class BaseWebTestCase extends WebTestCase
         return $this->client->getContainer()->get('translator');
     }
 
+    /**
+     * @param array<string> $params
+     */
     protected function getValidationMessage(string $id, array $params = []): ?string
     {
         return $this->getTranslator()->trans($id, $params, 'validators');
     }
 
-    protected function unauthorizedAction(string $method, string $uri)
+    protected function unauthorizedAction(string $method, string $uri): void
     {
         // Request
         $this->client->request($method, $uri);
@@ -74,7 +77,7 @@ class BaseWebTestCase extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
     }
 
-    protected function forbiddenAction(string $method, string $uri)
+    protected function forbiddenAction(string $method, string $uri): void
     {
         // Request
         $this->client->request($method, $uri);
@@ -83,7 +86,7 @@ class BaseWebTestCase extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
-    protected function notFound404Exception(string $method, string $uri)
+    protected function notFound404Exception(string $method, string $uri): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -100,7 +103,7 @@ class BaseWebTestCase extends WebTestCase
         return UserFactory::createOne([
                 'username' => 'user_username',
                 'email' => 'user_username@todolist.fr',
-                'plainPassword' => 'todolist'
+                'plainPassword' => 'todolist',
             ])
             ->object();
     }
@@ -110,7 +113,7 @@ class BaseWebTestCase extends WebTestCase
         $user = UserFactory::new([
                 'username' => 'admin_username',
                 'email' => 'admin_username@todolist.fr',
-                'plainPassword' => 'todolist'
+                'plainPassword' => 'todolist',
             ])
             ->promoteRole('ROLE_ADMIN')
             ->create()
@@ -135,6 +138,9 @@ class BaseWebTestCase extends WebTestCase
         $this->client->request(Request::METHOD_GET, '/logout');
     }
 
+    /**
+     * @param array<string> $fields
+     */
     protected function submitCreateForm(Crawler $crawler, array $fields): Crawler
     {
         $form = $crawler->selectButton('Ajouter')->form($fields);
@@ -142,6 +148,9 @@ class BaseWebTestCase extends WebTestCase
         return $this->client->submit($form);
     }
 
+    /**
+     * @param array<string> $fields
+     */
     protected function submitEditForm(Crawler $crawler, array $fields): Crawler
     {
         $form = $crawler->selectButton('Modifier')->form($fields);
@@ -149,7 +158,7 @@ class BaseWebTestCase extends WebTestCase
         return $this->client->submit($form);
     }
 
-    private function purgeDatabase()
+    private function purgeDatabase(): void
     {
         $purger = new ORMPurger($this->getEntityManager());
         $purger->purge();

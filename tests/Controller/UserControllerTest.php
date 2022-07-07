@@ -5,16 +5,16 @@ namespace App\Tests\Controller;
 use App\Entity\User;
 use App\Factory\TaskFactory;
 use App\Factory\UserFactory;
+use App\Tests\Utils\BaseWebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Tests\Utils\BaseWebTestCase;
 
 class UserControllerTest extends BaseWebTestCase
 {
     /**
      * @dataProvider getForbiddenActions
      */
-    public function testForbiddenAction(string $method, string $uri)
+    public function testForbiddenAction(string $method, string $uri): void
     {
         $this->createUserAndLogin();
 
@@ -24,7 +24,7 @@ class UserControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getForbiddenActionsWithExistingUser
      */
-    public function testForbiddenActionWithExistingUser(string $method, string $uri)
+    public function testForbiddenActionWithExistingUser(string $method, string $uri): void
     {
         $this->createUserAndLogin();
 
@@ -38,7 +38,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
-    public function testUserGETList()
+    public function testUserGETList(): void
     {
         $this->createAdminUserAndLogin();
 
@@ -94,7 +94,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals($deleteUserUri, $deleteAction->attr('data-href'));
     }
 
-    public function testUserGETCreate()
+    public function testUserGETCreate(): void
     {
         $this->createAdminUserAndLogin();
 
@@ -132,7 +132,7 @@ class UserControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getRoleUserOrRoleAdmin()
      */
-    public function testUserPOSTCreate(string $role)
+    public function testUserPOSTCreate(string $role): void
     {
         $this->createAdminUserAndLogin();
 
@@ -143,7 +143,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->submitCreateForm($crawler, [
             'user[username]' => 'test',
             'user[email]' => 'test@totdolist.fr',
-            'user[role]' => $role
+            'user[role]' => $role,
         ]);
 
         // Redirection
@@ -172,8 +172,7 @@ class UserControllerTest extends BaseWebTestCase
         ?string $fieldValue,
         string $selector,
         string $idValidationMessage
-    ) {
-
+    ): void {
         $this->createAdminUserAndLogin();
 
         // New user
@@ -195,7 +194,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
     }
 
-    public function testUserGETEdit()
+    public function testUserGETEdit(): void
     {
         $this->createAdminUserAndLogin();
 
@@ -259,7 +258,7 @@ class UserControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getRoleUserOrRoleAdmin()
      */
-    public function testUserPOSTEdit(string $role)
+    public function testUserPOSTEdit(string $role): void
     {
         $this->createAdminUserAndLogin();
 
@@ -273,7 +272,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->submitEditForm($crawler, [
             'user[username]' => 'user_username_updated',
             'user[email]' => 'user_email_updated@todolist.fr',
-            'user[role]' => $role
+            'user[role]' => $role,
         ]);
 
         // Redirection
@@ -302,8 +301,7 @@ class UserControllerTest extends BaseWebTestCase
         ?string $fieldValue,
         string $selector,
         string $idValidationMessage
-    ) {
-
+    ): void {
         $this->createAdminUserAndLogin();
 
         // Initial User
@@ -326,7 +324,7 @@ class UserControllerTest extends BaseWebTestCase
         $this->assertEquals($this->getValidationMessage($idValidationMessage), $fieldError);
     }
 
-    public function testUserPOSTDelete()
+    public function testUserPOSTDelete(): void
     {
         $this->createAdminUserAndLogin();
 
@@ -392,14 +390,17 @@ class UserControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getNotFoundActions()
      */
-    public function testUser404Exception(string $method, string $uri)
+    public function testUser404Exception(string $method, string $uri): void
     {
         $this->createAdminUserAndLogin();
 
         $this->notFound404Exception($method, $uri);
     }
 
-    private function getNotFoundActions(): array
+    /**
+     * @return array<array<int, string>>
+     */
+    public function getNotFoundActions(): array
     {
         // Method, Uri
         return [
@@ -410,7 +411,10 @@ class UserControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function getValidationErrors(): array
+    /**
+     * @return array<array<?string>>
+     */
+    public function getValidationErrors(): array
     {
         $usernameField = 'user[username]';
         $usernameSelector = 'input[type=text]#user_username';
@@ -424,47 +428,50 @@ class UserControllerTest extends BaseWebTestCase
                 $usernameField,
                 null,
                 $usernameSelector,
-                'user.username.not_blank'
+                'user.username.not_blank',
             ],
             // Username max length
             [
                 $usernameField,
                 str_repeat('a', 26),
                 $usernameSelector,
-                'user.username.max'
+                'user.username.max',
             ],
             // Username unique
             [
                 $usernameField,
                 'user_username',
                 $usernameSelector,
-                'user.username.unique'
+                'user.username.unique',
             ],
             // Email not blank
             [
                 $emailField,
                 null,
                 $emailSelector,
-                'user.email.not_blank'
+                'user.email.not_blank',
             ],
             // Email max length
             [
                 $emailField,
-                sprintf("%s@%s.fr", str_repeat('e', 30), str_repeat('e', 30)),
+                sprintf('%s@%s.fr', str_repeat('e', 30), str_repeat('e', 30)),
                 $emailSelector,
-                'user.email.max'
+                'user.email.max',
             ],
             // Email unique
             [
                 $emailField,
                 'user_username@todolist.fr',
                 $emailSelector,
-                'user.email.unique'
+                'user.email.unique',
             ],
         ];
     }
 
-    private function getForbiddenActions(): array
+    /**
+     * @return array<array<int, string>>
+     */
+    public function getForbiddenActions(): array
     {
         // Method, Uri
         return [
@@ -474,6 +481,9 @@ class UserControllerTest extends BaseWebTestCase
         ];
     }
 
+    /**
+     * @return array<array<int, string>>
+     */
     public function getForbiddenActionsWithExistingUser(): array
     {
         // Method, Uri
@@ -484,7 +494,10 @@ class UserControllerTest extends BaseWebTestCase
         ];
     }
 
-    private function getRoleUserOrRoleAdmin(): array
+    /**
+     * @return array<array<string>>
+     */
+    public function getRoleUserOrRoleAdmin(): array
     {
         return [
             ['ROLE_ADMIN'],

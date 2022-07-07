@@ -11,12 +11,12 @@ class DefaultControllerTest extends BaseWebTestCase
     /**
      * @dataProvider getUnauthorizedActions
      */
-    public function testUnauthorizedAction(string $method, string $uri)
+    public function testUnauthorizedAction(string $method, string $uri): void
     {
         $this->unauthorizedAction($method, $uri);
     }
 
-    public function testDefaultGETHomepageAuthorized()
+    public function testDefaultGETHomepageAuthorized(): void
     {
         // Logged User
         $this->createUserAndLogin();
@@ -86,7 +86,7 @@ class DefaultControllerTest extends BaseWebTestCase
         $this->assertEquals($listDoneTasksButton, $listDoneTasksUri);
     }
 
-    public function testDefaultGETHomepageAdminAuthorized()
+    public function testDefaultGETHomepageAdminAuthorized(): void
     {
         // Logged User
         $this->createAdminUserAndLogin();
@@ -102,7 +102,10 @@ class DefaultControllerTest extends BaseWebTestCase
         $this->assertEquals('Utilisateurs', $homepage->text());
     }
 
-    private function getUnauthorizedActions(): array
+    /**
+     * @return array<array<int, string>>
+     */
+    public function getUnauthorizedActions(): array
     {
         // Method, Uri
         return [
