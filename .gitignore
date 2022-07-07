@@ -4,7 +4,6 @@
 
 /tools/rector/vendor
 .phpunit.result.cache
-/tools/php-code-sniffer/vendor
 
 ###> symfony/phpunit-bridge ###
 .phpunit
