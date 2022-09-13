@@ -1,6 +1,21 @@
-# ToDo & Co - ToDoList App
+# ToDo & Co - ToDoList
+*Amélioration une application Symfony existante*
+
+[Site](https://todolist.magali.website)  
+
+[Documentation sur l'authentification](https://magali-thuaire.github.io/oc-todolist/documentation_authentification.pdf)  
+
+[Rapport d'audit](https://magali-thuaire.github.io/oc-todolist/rapport_audit.pdf)  
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/24620ce050ad40cd9afc507fdd3de9e8)](https://www.codacy.com/gh/magali-thuaire/oc-todolist/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magali-thuaire/oc-todolist&amp;utm_campaign=Badge_Grade)
+
+## Compétences
+
+-	Implémenter de nouvelles fonctionnalités au sein d’une application existante
+-	Lire et retranscrire le fonctionnement d’un morceau de code écrit par d’autres développeurs 
+-	Mettre en œuvre des tests unitaires et fonctionnels
+-	Analyser la qualité́ de code et la performance d’une application
+-	Établir un plan pour réduire la dette technique d’une application
 
 ## About
 
